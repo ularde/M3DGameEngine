@@ -10,8 +10,7 @@
 // 添加要在此处预编译的标头
 #include "framework.h"
 #include "glad.h"
-#include <SDL.h>
-#include <jemalloc/jemalloc.h>
+#include <GLFW/glfw3.h>
 
 #include "tinyxml2.h"
 

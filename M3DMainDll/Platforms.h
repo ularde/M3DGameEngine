@@ -2,6 +2,7 @@
 #include <vector>
 #include <atomic>
 #include <SDL.h>
+#include <M3DS/M3DS.h>
 
 class MBasicPlatform {
 public:
@@ -10,9 +11,9 @@ public:
 	virtual void Tick(){}
 	bool GetWhetherShouldExit() { return this->shouldExit; }
 protected:
-	SDL_Event currentSDLEvent;
 	bool shouldExit = false;
-	tinyxml2::XMLDocument *gameConfigDoc;
+	tinyxml2::XMLDocument* gameConfigDoc = NULL;
+	M3DS_Module* mainModule = NULL;
 protected:
 	//∂¡»°≈‰÷√
 	void ReadAmbientConfig();
@@ -24,9 +25,7 @@ public:
 	~MOfflineGame();
 	void Tick();
 private:
-	std::string windowTitle;
-	SDL_Window *window;
-	SDL_GLContext GLContext;
+	GLFWwindow* window;
 	bool fullscreenFlag = false;
 	int windowWidth = 800;
 	int windowHeight = 600;

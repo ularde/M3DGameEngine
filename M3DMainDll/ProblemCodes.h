@@ -1,2 +1,3 @@
 #pragma once
 #define M3D_CFG_BADATTRIBUTION 0x00
+#define M3D_M3DS_BADMAINMODULE 0x01

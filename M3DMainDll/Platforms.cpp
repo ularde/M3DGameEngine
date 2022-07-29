@@ -6,10 +6,11 @@
 MOfflineGame::MOfflineGame(unsigned int OS) {
 	this->ReadAmbientConfig();
 	//获取配置信息
-	const char *fullscreenOrigin = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("fullscreen");
+	const char* fullscreenOrigin = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("fullscreen");
 	const char* heightOrigin = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("height");
 	const char* widthOrigin = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("width");
-	this->windowTitle = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("title");
+	const char* mainModulePath = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("main_script");
+	const char* windowTitle = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("title");
 	if (widthOrigin && heightOrigin) {
 		if (!sscanf(widthOrigin, "%d", &this->windowWidth) || !sscanf(heightOrigin, "%d", &this->windowHeight)) {
 			M3DConsole_PrintWarning("MainDll Configuration", M3D_CFG_BADATTRIBUTION);
@@ -23,46 +24,58 @@ MOfflineGame::MOfflineGame(unsigned int OS) {
 	else {
 		M3DConsole_PrintWarning("MainDll Configuration", M3D_CFG_BADATTRIBUTION);
 	}
-	//初始化SDL和OpenGL上下文
-	SDL_Init(SDL_INIT_EVERYTHING);
-	this->window = SDL_CreateWindow(this->windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, this->windowWidth, this->windowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
-	this->GLContext = SDL_GL_CreateContext(window);
-	SDL_GL_SetSwapInterval(-1);
+	if (mainModulePath) {
+		this->mainModule = new M3DS_Module();
+		if (!this->mainModule->LoadModule(mainModulePath)) {
+			M3DConsole_PrintError(mainModulePath, M3D_M3DS_BADMAINMODULE);
+		}
+	}
+	else {
+		this->mainModule = new M3DS_Module();
+		M3DConsole_PrintError(mainModulePath, M3D_M3DS_BADMAINMODULE);
+	}
+	//初始化GLFW和OpenGL上下文
+	if (!glfwInit()) {
+
+	}
+	this->window = glfwCreateWindow(this->windowWidth, this->windowHeight, windowTitle, NULL, NULL);
+	glfwMakeContextCurrent(this->window);
+	glfwSwapInterval(-1);
 	//获取OpenGL函数指针
-	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		MessageBeep(MB_ICONERROR);
 		MessageBox(NULL, L"Failed to initialize OpenGL.", L"M3D GameEngine", MB_ICONERROR);
-		SDL_GL_DeleteContext(this->GLContext);
-		SDL_DestroyWindow(this->window);
-		SDL_Quit();
+		glfwDestroyWindow(this->window);
+		glfwTerminate();
 	}
-	//SDL事件
 }
 
 
 MOfflineGame::~MOfflineGame() {
 	delete[]this->gameConfigDoc;
-	SDL_DestroyWindow(this->window);
-	SDL_Quit();
+	delete[]this->mainModule;
+	glfwDestroyWindow(this->window);
+	glfwTerminate();
 }
 
 void MOfflineGame::Tick() {
-	SDL_PollEvent(&this->currentSDLEvent);
-	//
-	if (this->currentSDLEvent.type == SDL_QUIT) {
-		this->shouldExit = true;
-	}
-	//
+	this->shouldExit = glfwWindowShouldClose(this->window);
+	//this->mainModule->RunModule();
 	glViewport(0, 0, windowWidth, windowHeight);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	SDL_GL_SwapWindow(this->window);
+	glfwSwapBuffers(this->window);
+	glfwPollEvents();
 }
 
 void MBasicPlatform::ReadAmbientConfig() {
 	this->gameConfigDoc = new tinyxml2::XMLDocument();
 	if (!this->gameConfigDoc->LoadFile(".\\..\\..\\Game\\Config\\ambient.xml") == tinyxml2::XML_SUCCESS) {
+#ifdef _DEBUG
+		this->gameConfigDoc->LoadFile("D:\\Repos\\M3DGameEngine\\Game\\Config\\ambient.xml");
+#else
 		MessageBeep(MB_ICONERROR);
 		MessageBox(NULL, L"Failed to read document Game\\Config\\ambient.xml.", L"M3D GameEngine", MB_ICONERROR);
+#endif
 	}
 }

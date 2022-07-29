@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 
+
+
 static struct M3DS_ModuleVM {
 	unsigned int lastIP = 0;
 	unsigned int IP = 0;
@@ -15,9 +17,11 @@ static struct M3DS_ModuleVM {
 	std::vector<long long> templonglongRegs;
 };
 
+static std::vector<M3DS_ModuleVM*> vmInstances = { NULL };
+static unsigned int currentVMInstanceID = 0;
+
 enum M3DS_InstructionSet {
 	M3DS_TYPE_INT_IMM,
-	M3DS_TYPE_CHAR_IMM,
 	M3DS_TYPE_SPEC_REG,
 	M3DS_TYPE_CHAR_REG,
 	M3DS_TYPE_INT_REG,
@@ -53,4 +57,4 @@ enum M3DS_InstructionSet {
 	M3DS_OP_JGT
 };
 
-void M3DS_ExecuteInstructions(std::vector<int> instructions);
+void M3DS_ExecuteModuleInstructions(unsigned int vm_instance_ID, std::vector<int> instructions);

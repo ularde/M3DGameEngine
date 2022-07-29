@@ -1,1 +1,1 @@
-<?xml version="1.0"?><ambient_settings><MainWindow width="1280" height="760" fullsceen="1" title="M3D Game"></MainWindow></ambient_settings>
+<?xml version="1.0"?><ambient_settings><MainWindow width="1280" height="760" fullscreen="1" title="M3D Game" main_script=".\..\..\Game\Scripts\main.m3dsc"></MainWindow></ambient_settings>
