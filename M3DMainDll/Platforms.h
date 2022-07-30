@@ -2,7 +2,6 @@
 #include <vector>
 #include <atomic>
 #include <SDL.h>
-#include <M3DS/M3DS.h>
 
 class MBasicPlatform {
 public:
@@ -13,7 +12,6 @@ public:
 protected:
 	bool shouldExit = false;
 	tinyxml2::XMLDocument* gameConfigDoc = NULL;
-	M3DS_Module* mainModule = NULL;
 protected:
 	//∂¡»°≈‰÷√
 	void ReadAmbientConfig();
@@ -25,6 +23,12 @@ public:
 	~MOfflineGame();
 	void Tick();
 private:
+	void InitTestInfoFonts();
+	void DisplayTestInfo();
+	FTFont* infoFont_EN = NULL;
+	FTFont* infoFont_CN = NULL;
+	FTFont* infoFont_UY = NULL;
+
 	GLFWwindow* window;
 	bool fullscreenFlag = false;
 	int windowWidth = 800;

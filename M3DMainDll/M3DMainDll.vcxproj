@@ -135,7 +135,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>OPENGL32.lib;glfw3_mt.lib;freetype.lib;M3DScriptSystem.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OPENGL32.lib;glfw3_mt.lib;freetype.lib;ftgl_static_D.lib;M3DScriptSystem.lib;python3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -155,12 +155,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>OPENGL32.lib;glfw3_mt.lib;freetype.lib;M3DScriptSystem.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OPENGL32.lib;glfw3_mt.lib;freetype.lib;ftgl_static.lib;M3DScriptSystem.lib;python3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
     <ClInclude Include="BasicContainer.h" />
+    <ClInclude Include="Class.h" />
     <ClInclude Include="ConsoleOperations.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="glad.h" />

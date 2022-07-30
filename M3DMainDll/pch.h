@@ -22,4 +22,7 @@
 
 #include <freetype/freetype.h>
 
+#include <FTGL/ftgl.h>
+#include <Python.h>
+
 #endif //PCH_H

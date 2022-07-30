@@ -1,8 +1,9 @@
 #pragma once
 #include <vector>
 #include <string>
+#include "Class.h"
 
-class MBasicContainer {
+class MBasicContainer :public MClass {
 public:
 	virtual void Tick() {}
 	bool GetWhetherShouldQuit() { return shouldQuit; }

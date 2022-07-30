@@ -1,11 +1,11 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "Platforms.h"
 #include "ConsoleOperations.h"
 #include "ProblemCodes.h"
 
 MOfflineGame::MOfflineGame(unsigned int OS) {
 	this->ReadAmbientConfig();
-	//»ñÈ¡ÅäÖÃÐÅÏ¢
+	//èŽ·å–é…ç½®ä¿¡æ¯
 	const char* fullscreenOrigin = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("fullscreen");
 	const char* heightOrigin = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("height");
 	const char* widthOrigin = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("width");
@@ -25,47 +25,71 @@ MOfflineGame::MOfflineGame(unsigned int OS) {
 		M3DConsole_PrintWarning("MainDll Configuration", M3D_CFG_BADATTRIBUTION);
 	}
 	if (mainModulePath) {
-		this->mainModule = new M3DS_Module();
-		if (!this->mainModule->LoadModule(mainModulePath)) {
-			M3DConsole_PrintError(mainModulePath, M3D_M3DS_BADMAINMODULE);
-		}
+		//this->mainModule = new M3DS_Module();
+		//if (!this->mainModule->LoadModule(mainModulePath)) {
+		//	M3DConsole_PrintError(mainModulePath, M3D_M3DS_BADMAINMODULE);
+		//}
 	}
 	else {
-		this->mainModule = new M3DS_Module();
+		//this->mainModule = new M3DS_Module();
 		M3DConsole_PrintError(mainModulePath, M3D_M3DS_BADMAINMODULE);
 	}
-	//³õÊ¼»¯GLFWºÍOpenGLÉÏÏÂÎÄ
+	//åˆå§‹åŒ–GLFWå’ŒOpenGLä¸Šä¸‹æ–‡
 	if (!glfwInit()) {
 
 	}
 	this->window = glfwCreateWindow(this->windowWidth, this->windowHeight, windowTitle, NULL, NULL);
 	glfwMakeContextCurrent(this->window);
 	glfwSwapInterval(-1);
-	//»ñÈ¡OpenGLº¯ÊýÖ¸Õë
+	//èŽ·å–OpenGLå‡½æ•°æŒ‡é’ˆ
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		MessageBeep(MB_ICONERROR);
 		MessageBox(NULL, L"Failed to initialize OpenGL.", L"M3D GameEngine", MB_ICONERROR);
 		glfwDestroyWindow(this->window);
 		glfwTerminate();
 	}
+	this->InitTestInfoFonts();
 }
 
 
 MOfflineGame::~MOfflineGame() {
 	delete[]this->gameConfigDoc;
-	delete[]this->mainModule;
+	//delete[]this->mainModule;
 	glfwDestroyWindow(this->window);
 	glfwTerminate();
 }
 
 void MOfflineGame::Tick() {
 	this->shouldExit = glfwWindowShouldClose(this->window);
+	glfwGetWindowSize(this->window, &(this->windowWidth), &(this->windowHeight));
 	//this->mainModule->RunModule();
 	glViewport(0, 0, windowWidth, windowHeight);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
+	this->DisplayTestInfo();
 	glfwSwapBuffers(this->window);
 	glfwPollEvents();
+}
+
+void MOfflineGame::InitTestInfoFonts() {
+	this->infoFont_EN = new FTGLPixmapFont(".\\..\\..\\Game\\Fonts\\arial.ttf");
+	this->infoFont_CN = new FTGLPixmapFont(".\\..\\..\\Game\\Fonts\\Deng.ttf");
+	this->infoFont_UY = new FTGLPixmapFont(".\\..\\..\\Game\\Fonts\\Microsoft-Uighur.ttf");
+	this->infoFont_EN->FaceSize(20);
+	this->infoFont_CN->FaceSize(20);
+	this->infoFont_UY->FaceSize(20);
+}
+
+void MOfflineGame::DisplayTestInfo() {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0.0, this->windowWidth, this->windowHeight, 0.0, -1.0, 1.0);
+	glRasterPos2d(100.0, 100.0);
+	this->infoFont_EN->Render(L"English M3D Game Engine An open source game engine");
+	glRasterPos2d(100.0, 70.0);
+	this->infoFont_CN->Render(L"ç®€ä½“ä¸­æ–‡ M3D Game Engine ä¸€ä¸ªå¼€æºæ¸¸æˆå¼•æ“Ž");
+	glRasterPos2d(100.0, 40.0);
+	this->infoFont_UY->Render(L"Ø¦Û‡ÙŠØºÛ‡Ø±");
 }
 
 void MBasicPlatform::ReadAmbientConfig() {
