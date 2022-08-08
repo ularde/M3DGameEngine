@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "ConsoleOperations.h"
-#include "ProblemCodes.h"
+#include "Global.h"
 
 void M3DConsole_SetTextColor(int color) {
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);

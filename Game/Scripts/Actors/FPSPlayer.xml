@@ -1,0 +1,1 @@
+<ActorDefinition class="Player" name="FPSPlayer"><camera>FPSCamera</><character>Objects\characters\FPSPlayer.mcdf</></>

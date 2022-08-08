@@ -36,7 +36,7 @@
     <ClInclude Include="ConsoleOperations.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ProblemCodes.h">
+    <ClInclude Include="Global.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="BasicContainer.h">
@@ -48,10 +48,46 @@
     <ClInclude Include="Actor.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="UIActors.h">
+    <ClInclude Include="Class.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Class.h">
+    <ClInclude Include="GameConsole.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BackgroundQuad.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MatrixManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedFunc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Test.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -80,10 +116,37 @@
     <ClCompile Include="BasicContainer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="UIActors.cpp">
+    <ClCompile Include="UIForm.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="UIForm.cpp">
+    <ClCompile Include="GameConsole.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BackgroundQuad.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MatrixManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SharedFunc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

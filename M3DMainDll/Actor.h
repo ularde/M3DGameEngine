@@ -2,8 +2,8 @@
 #include <vector>
 #include "Class.h"
 
-class MActor :public MClass {
+class MActor :public MPythonBoundObject {
 public:
-	virtual void Tick() {}
+	virtual void Tick(double delta_time) = 0;
 protected:
 };

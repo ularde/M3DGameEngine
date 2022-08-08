@@ -14,6 +14,9 @@
 
 #include "tinyxml2.h"
 
+#include <jemalloc/jemalloc.h>
+#include <jemalloc/jemalloc_mangle.h>
+
 #include <vector>
 #include <map>
 #include <unordered_map>
@@ -24,5 +27,7 @@
 
 #include <FTGL/ftgl.h>
 #include <Python.h>
+
+#include "Global.h"
 
 #endif //PCH_H
