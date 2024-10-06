@@ -11,8 +11,11 @@ public:
 	void RenderQuad();
 	void BeginRender();
 	void EndRender();
+	GLuint GetFramebufferID() { return this->FBO; }
 private:
+	bool enableDebugQuad = false;
+
 	GLuint FBO = 0, RBO = 0, backgroundTex = 0;
-	MBasicPlatform* platform = NULL;
+	MBasicPlatform* gPlatform = NULL;
 protected:
 };

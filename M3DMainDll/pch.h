@@ -17,17 +17,33 @@
 #include <jemalloc/jemalloc.h>
 #include <jemalloc/jemalloc_mangle.h>
 
+
 #include <vector>
 #include <map>
 #include <unordered_map>
 #include <atomic>
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <random>
 
 #include <freetype/freetype.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <FTGL/ftgl.h>
-#include <Python.h>
 
 #include "Global.h"
+
+#include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+
+#include <PxConfig.h>
+#include <PxPhysicsAPI.h>
+
+#include <lua.hpp>
+#include <sol/sol.hpp>
 
 #endif //PCH_H

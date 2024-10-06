@@ -1,0 +1,6 @@
+<Scene name="AnimalCell" script="Scripts\Gameplay\animal-cell.lua">
+    <TimeOfDay dynamic="1" speed="100" xoffset="0.2" iSun="22" rPlanet="6371000" rAtmos="6471000" kRlh="0.000006,0.000013,0.000022" kMie="2.1e-05" shRlh="8000" shMie="1200" g="0.75800002"/>
+    <Actor class="Entity" name="MVCamera" def="Scripts\Actors\Entities\MVCamera.ment" position="60.000000,100.000000,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+    <Actor class="RigidStatic" name="Ground" model="Objects\ground\ground.obj" material="" position="0.000000,-4.000000,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic1" model="Objects\animal-cell\animalcellCOLOR.obj" material="" position="0.000000,0.000000,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+</Scene>

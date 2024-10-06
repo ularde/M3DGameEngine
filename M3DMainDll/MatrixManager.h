@@ -25,7 +25,7 @@ public:
 	void LoadModelMatrix(glm::mat4 matrix);
 	void LoadViewMatrix(glm::mat4 matrix);
 private:
-	MBasicPlatform* platform = NULL;
+	MBasicPlatform* gPlatform = NULL;
 	unsigned int basicVertShader = 0;
 	unsigned int shaderPipeline = 0;
 };

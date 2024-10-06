@@ -1,1 +1,1 @@
-<?xml version="1.0"?><ambient_settings><MainWindow width="1280" height="760" fullscreen="0" title="M3D Game" main_script=".\..\..\Game\Scripts\main.py"></MainWindow></ambient_settings>
+<?xml version="1.0"?><AmbientSettings><Main title="M3D Game" main_script="Scripts\System\main.lua"></Main></AmbientSettings>

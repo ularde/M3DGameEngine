@@ -1,9 +1,21 @@
 #pragma once
-#include <vector>
+#include <string>
 #include "Class.h"
 
-class MActor :public MPythonBoundObject {
+#include <PxPhysicsAPI.h>
+
+class MScriptableObject;
+class MScene;
+class MActorEditorAgent;
+
+class MActor :public MScriptableObject {
 public:
-	virtual void Tick(double delta_time) = 0;
+	std::string name;
+	MScene* mParent = NULL;
+	MActorEditorAgent* mEditorAgent = NULL;
+	virtual void Save() = 0;
+	virtual void Update(double dt) = 0;
+	virtual void Render() = 0;
+	virtual void RenderForDepthMapping() = 0;
 protected:
 };

@@ -1,0 +1,16 @@
+<Material name="stone_wall_vkmeddz">
+<SubMaterial name="default" ID="0" forward_pipeline="0" surface_type="Metal">
+<Texture type="texture_albedo" path="Textures\megascans\concrete_damaged_vjyifef\vjyifef_8K_Albedo.jpg"/>
+<Texture type="texture_normal" path="Textures\megascans\concrete_damaged_vjyifef\vjyifef_8K_Normal.jpg"/>
+<Texture type="texture_metallic" path="Textures\default\default_metallic.png"/>
+<Texture type="texture_roughness" path="Textures\megascans\concrete_damaged_vjyifef\vjyifef_8K_Roughness.jpg"/>
+<Texture type="texture_AO" path="Textures\megascans\concrete_damaged_vjyifef\vjyifef_8K_AO.jpg"/>
+</SubMaterial>
+<SubMaterial name="default" ID="1" forward_pipeline="0" surface_type="Metal">
+<Texture type="texture_albedo" path="Textures\megascans\concrete_damaged_vjyifef\vjyifef_8K_Albedo.jpg"/>
+<Texture type="texture_normal" path="Textures\megascans\concrete_damaged_vjyifef\vjyifef_8K_Normal.jpg"/>
+<Texture type="texture_metallic" path="Textures\default\default_metallic.png"/>
+<Texture type="texture_roughness" path="Textures\megascans\concrete_damaged_vjyifef\vjyifef_8K_Roughness.jpg"/>
+<Texture type="texture_AO" path="Textures\megascans\concrete_damaged_vjyifef\vjyifef_8K_AO.jpg"/>
+</SubMaterial>
+</Material>

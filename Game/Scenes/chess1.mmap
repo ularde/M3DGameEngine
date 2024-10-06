@@ -1,0 +1,11 @@
+<Scene name="Chess" script="Scripts\Gameplay\chess.lua">
+    <TimeOfDay dynamic="1" speed="100" xoffset="0.2" iSun="22" rPlanet="6371000" rAtmos="6471000" kRlh="0.000006,0.000013,0.000022" kMie="2.1e-05" shRlh="8000" shMie="1200" g="0.75800002"/>
+    <Actor class="Entity" name="LocalPlayer" def="Scripts\Actors\Entities\ChessCamera.ment" position="60.000000,100.000000,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+    <Actor class="RigidStatic" name="Ground" model="Objects\floor2\floor2.obj" material="" position="0.000000,-8.279198,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+    <Actor class="Entity" name="Entity0" def="Scripts\Actors\Entities\BasicEntity.ment" position="60.000000,5.000000,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic1" model="Objects\pyramid\pyramid.obj" material="" position="-16.552851,-8.279204,-37.898331" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic2" model="Objects\pyramid\pyramid.obj" material="" position="21.634691,-8.279202,-24.400829" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic3" model="Objects\pyramid\pyramid.obj" material="" position="-7.140724,-8.279193,29.823025" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic4" model="Objects\pyramid\pyramid.obj" material="" position="-57.451035,-8.279197,3.945328" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+    <Actor class="Entity" name="AC90AA02-BA55-4307-87A3-09B982F4A85F" def="Scripts\Actors\Entities\BasicEntity.ment" position="21.912447,-3.279197,4.892945" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+</Scene>

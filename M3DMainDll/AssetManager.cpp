@@ -1,14 +1,16 @@
 #include "pch.h"
 #include "AssetManager.h"
 #include "Texture.h"
+#include "Model.h"
 #include "Material.h"
 
+class MModel;
 class MTexture;
 class MMaterial;
-
+class MAssetManager;
 
 MAssetManager::MAssetManager(MBasicPlatform* platform_) {
-	this->platform = platform_;
+	gPlatform = platform_;
 }
 
 MAssetManager::~MAssetManager()
@@ -16,45 +18,75 @@ MAssetManager::~MAssetManager()
 }
 
 MTexture* MAssetManager::AddTexture(bool immediately_load, const std::string& type, const std::string& path, char* guid) {
-	static MTexture* object = NULL;
-	for (unsigned int i = 0; i < this->assetsPtrs.size(); ++i) {
-		if (path == this->assetsPtrs[i]->GetPath() && type == this->assetsPtrs[i]->GetType() && this->assetsPtrs[i]->superType == M3D_ASSET_TEXTURE) {
-			object = reinterpret_cast<MTexture*>(this->assetsPtrs[i]);
-			this->assetsPtrs.push_back(object);
-			return object;
-		}
-		else {
-			break;
-		}
+	MTexture* object = NULL;
+	if (gTexturesMap[path]) {
+		object = gTexturesMap[path];
+		return object;
 	}
-	object = new MTexture(immediately_load, this, guid, type, path);
-	return object;
+	else {
+		object = new MTexture(immediately_load, this, guid, type, path);
+		gAssetsPtrs.push_back(object);
+		gTexturesMap[path] = object;
+		return object;
+	}
 }
 
-MMaterial* MAssetManager::AddMaterial(bool immediately_load, const std::string& type, const std::string& path, char* guid) {
-	static MMaterial* object = NULL;
-	for (unsigned int i = 0; i < this->assetsPtrs.size(); ++i) {
-		if (path == this->assetsPtrs[i]->GetPath() && type == this->assetsPtrs[i]->GetType() && this->assetsPtrs[i]->superType == M3D_ASSET_MATERIAL) {
-			object = reinterpret_cast<MMaterial*>(this->assetsPtrs[i]);
-			this->assetsPtrs.push_back(object);
-			return object;
-		}
-		else {
-			break;
-		}
+MCubemap* MAssetManager::AddCubemap(bool immediately_load, const std::string& type, 
+	const std::string& name, char* guid,
+	const std::string& right, const std::string& left,
+	const std::string& top, const std::string& bottom,
+	const std::string& back, const std::string& front) {
+	MCubemap* object = NULL;
+	if (gCubemapMap[name]) {
+		object = gCubemapMap[name];
+		return object;
 	}
-	object = new MMaterial(immediately_load, this, guid, type, path);
-	return object;
+	else {
+		object = new MCubemap(immediately_load, this, 
+			name, guid, right, left, 
+			top, bottom, back, front);
+		gAssetsPtrs.push_back(object);
+		gCubemapMap[name] = object;
+		return object;
+	}
+}
+
+MModel* MAssetManager::AddModel(bool immediately_load, const std::string& type, const std::string& path, char* guid) {
+	MModel* object = NULL;
+	if (gModelsMap[path]) {
+		object = gModelsMap[path];
+		return object;
+	}
+	else {
+		object = new MModel(immediately_load, this, guid, type, path);
+		gAssetsPtrs.push_back(object);
+		gModelsMap[path] = object;
+		return object;
+	}
+}
+
+MMaterial* MAssetManager::AddMaterial(const std::string& type, const std::string& path, char* guid) {
+	MMaterial* object = NULL;
+	if (gMaterialsMap[path]) {
+		object = gMaterialsMap[path];
+		return object;
+	}
+	else {
+		object = new MMaterial(gPlatform, path);
+		gAssetsPtrs.push_back(object);
+		gMaterialsMap[path] = object;
+		return object;
+	}
 }
 
 void MAssetManager::UnloadAsset(const std::string& guid) {
-
+	
 }
 
 MAsset* MAssetManager::GetAsset(const std::string& guid) {
-	for (unsigned int i = 0; i < this->assetsPtrs.size(); ++i) {
-		if (this->assetsPtrs[i]->GetGUID() == guid) {
-			return this->assetsPtrs[i];
+	for (unsigned int i = 0; i < gAssetsPtrs.size(); ++i) {
+		if (gAssetsPtrs[i]->GetGUID() == guid) {
+			return gAssetsPtrs[i];
 		}
 		else {
 			break;

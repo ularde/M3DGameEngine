@@ -365,3 +365,14 @@ FodyWeavers.xsd
 #Libs and Dlls
 *.lib
 *.dll
+/New_001.zip
+*.zip
+/Game/Objects
+/Game/Textures/skyboxes
+/Game/Textures/shades-tile
+/Game/Textures/rustediron2
+/Game/Textures/megascans
+/Game/Textures/hexagon-pavers1-bl
+/Game/Textures/gray-granite-flecks
+/Game/Textures/forest-trail1-bl
+/Game/Textures/barren-ground-rock

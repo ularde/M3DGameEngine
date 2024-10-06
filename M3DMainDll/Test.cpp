@@ -1,8 +1,13 @@
 #include "pch.h"
 #include "Test.h"
+#include "Model.h"
+#include "Camera.h"
+#include "Scene.h"
 
-
-GLuint VAO, VBO, EBO;
+class MScene;
+class MModel;
+MModel* myModel = 0;
+MScene* tScene = 0;
 
 glm::vec3 cubePositions[] = {
     glm::vec3(0.0f,  0.0f,  0.0f),
@@ -18,112 +23,58 @@ glm::vec3 cubePositions[] = {
 };
 
 void InitTest(MBasicPlatform* platform) {
+    tScene = new MScene(true, platform, "Scenes\\Example.xml");
+
     glBindProgramPipeline(platform->pipelineID);
 
-	vs = new MVertexShaderProgram(platform, "Shaders\\test_vert.glsl");
-	fs = new MFragmentShaderProgram(platform, "Shaders\\test_frag.glsl");
+    platform->camera = new MFreeCamera(platform, platform->vertShader, platform->fragShader, 2.0f, glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    //myModel = new MModel(true, platform->assetManager, GenerateGuidA(), "model_static", "Objects\\mmodel\\char1.fbx");
 
-	vs->UseProgramStage();
-    fs->UseProgramStage();
-    platform->camera = new MFreeCamera(platform, vs, fs, 2.0f, glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-    float vertices[] = {
-         1.0f,  1.0f, 0.0f,  // top right
-         1.0f, -1.0f, 0.0f,  // bottom right
-        -1.0f, -1.0f, 0.0f,  // bottom left
-        -1.0f,  1.0f, 0.0f   // top left 
-    };
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,  // first Triangle
-        1, 2, 3   // second Triangle
-    };
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    glBindVertexArray(0);
-    //glBindProgramPipeline(0);
-
+    glBindProgramPipeline(0);
 }
 
 void RunTest(MBasicPlatform* platform) {
     static float z = 0.0f;
     z += 0.3f;
     // pass projection matrix to shader (note that in this case it could change every frame)
-    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glBindProgramPipeline(platform->pipelineID);
-    vs->UseProgramStage();
-    fs->UseProgramStage();
+    platform->vertShader->UseProgramStage();
+    platform->fragShader->UseProgramStage();
 
     glm::mat4 projection = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(45.0f), (float)platform->GetWindowWidth() / (float)platform->GetWindowHeight(), 0.1f, 100.0f);
-    vs->UniformMat4("projection", projection);
+    platform->vertShader->UniformMat4("projection", projection);
 
     glm::mat4 view = platform->camera->GetViewMatrix();
-    vs->UniformMat4("view", view);
+    platform->vertShader->UniformMat4("view", view);
     platform->camera->ProcessMovement();
 
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(z), glm::vec3(0.0f, 1.0f, 0.0f));
-    vs->UniformMat4("model", model);
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    model = glm::scale(model, glm::vec3(0.13f, 0.1f, 0.1f));
+    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+    platform->vertShader->UniformMat4("model", model);
 
-    glm::mat4 model2 = glm::mat4(1.0f);
-    model2 = glm::translate(model2, glm::vec3(5.0f, 0.0f, 0.0f));
-    model2 = glm::rotate(model2, glm::radians(z), glm::vec3(0.0f, 1.0f, 0.0f));
-    vs->UniformMat4("model", model2);
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    platform->vertShader->UniformVec3("viewPos", platform->camera->position);
+    platform->fragShader->UniformFloat("shininess", 32.0f);
+    platform->vertShader->UniformVec3("lightPos1", glm::vec3(0.0f, 8.0f, 5.0f));
+    platform->fragShader->UniformFloat("lightConstant1", 1.0f);
+    platform->fragShader->UniformFloat("lightLinear1", 0.09f);
+    platform->fragShader->UniformFloat("lightQuadratic1", 0.032f);
+    platform->fragShader->UniformVec3("lightAmbient1", glm::vec3(1.0f, 1.0f, 1.0f));
+    platform->fragShader->UniformVec3("lightDiffuse1", glm::vec3(1.0f, 1.0f, 1.0f));
+    platform->fragShader->UniformVec3("lightSpecular1", glm::vec3(1.0f, 1.0f, 1.0f));
+    platform->vertShader->UniformVec3("lightPos2", glm::vec3(3.0f * cos(glfwGetTime()), 20.0f, 3.0f * sin(glfwGetTime())));
+    platform->fragShader->UniformFloat("lightConstant2", 1.0f);
+    platform->fragShader->UniformFloat("lightLinear2", 0.09f);
+    platform->fragShader->UniformFloat("lightQuadratic2", 0.032f);
+    platform->fragShader->UniformVec3("lightAmbient2", glm::vec3(1.0f, 1.0f, 1.0f));
+    platform->fragShader->UniformVec3("lightDiffuse2", glm::vec3(1.0f, 1.0f, 1.0f));
+    platform->fragShader->UniformVec3("lightSpecular2", glm::vec3(1.0f, 1.0f, 1.0f));
 
-    glm::mat4 model3 = glm::mat4(1.0f);
-    model3 = glm::translate(model3, glm::vec3(10.0f, 0.0f, 0.0f));
-    model3 = glm::rotate(model3, glm::radians(z), glm::vec3(0.0f, 1.0f, 0.0f));
-    vs->UniformMat4("model", model3);
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-    model3 = glm::mat4(1.0f);
-    model3 = glm::translate(model3, glm::vec3(0.0f, 5.0f, 0.0f));
-    model3 = glm::rotate(model3, glm::radians(z), glm::vec3(0.0f, 1.0f, 0.0f));
-    vs->UniformMat4("model", model3);
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-    model3 = glm::mat4(1.0f);
-    model3 = glm::translate(model3, glm::vec3(5.0f, 5.0f, 0.0f));
-    model3 = glm::rotate(model3, glm::radians(z), glm::vec3(0.0f, 1.0f, 0.0f));
-    vs->UniformMat4("model", model3);
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-    model3 = glm::mat4(1.0f);
-    model3 = glm::translate(model3, glm::vec3(10.0f, 5.0f, 0.0f));
-    model3 = glm::rotate(model3, glm::radians(z), glm::vec3(0.0f, 1.0f, 0.0f));
-    vs->UniformMat4("model", model3);
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    //myModel->Render();
+    tScene->Tick(platform->GetDeltaTime());
 
     glBindProgramPipeline(0);
 }

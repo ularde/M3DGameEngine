@@ -13,6 +13,20 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\RenderPipeline">
+      <UniqueIdentifier>{e9c11065-bd0b-45dc-8f66-b201871e9643}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\RenderPipeline">
+      <UniqueIdentifier>{14d6968f-b727-4c1b-9f92-c860db45eea8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\UI">
+      <UniqueIdentifier>{93aea341-6231-434b-ad87-194dbc227ac1}</UniqueIdentifier>
+      <Extensions>
+      </Extensions>
+    </Filter>
+    <Filter Include="源文件\UI">
+      <UniqueIdentifier>{2091b1e4-1b39-4aff-8055-dbf8769d14be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -42,9 +56,6 @@
     <ClInclude Include="BasicContainer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="UIForm.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Actor.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -55,9 +66,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="BackgroundQuad.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="MatrixManager.h">
@@ -78,17 +86,131 @@
     <ClInclude Include="Scene.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Test.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="AssetManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="PhysXInterface.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RigidStatic.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityComponent.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPipeline.h">
+      <Filter>头文件\RenderPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderDeferredPipeline.h">
+      <Filter>头文件\RenderPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderObject.h">
+      <Filter>头文件\RenderPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderDepthMappingPipeline.h">
+      <Filter>头文件\RenderPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderOcclusionQueryPipeline.h">
+      <Filter>头文件\RenderPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderEnvironmentPipeline.h">
+      <Filter>头文件\RenderPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderAtomspherePipeline.h">
+      <Filter>头文件\RenderPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Atmosphere.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_internal.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_rectpack.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_textedit.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_truetype.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_opengl3.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_glfw.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_opengl3_loader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GameContext.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeOfDay.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ActorEditorAgent.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneEditorAgent.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="UIInputBox.h">
+      <Filter>头文件\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIPopup.h">
+      <Filter>头文件\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UITable.h">
+      <Filter>头文件\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UITabBox.h">
+      <Filter>头文件\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIListBox.h">
+      <Filter>头文件\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UILabel.h">
+      <Filter>头文件\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIForm.h">
+      <Filter>头文件\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIButton.h">
+      <Filter>头文件\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIControl.h">
+      <Filter>头文件\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIFormEditorAgent.h">
+      <Filter>头文件\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -113,12 +235,6 @@
     <ClCompile Include="ConsoleOperations.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="BasicContainer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="UIForm.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="GameConsole.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -137,14 +253,89 @@
     <ClCompile Include="Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Test.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="AssetManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RigidStatic.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityComponent.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderDeferredPipeline.cpp">
+      <Filter>源文件\RenderPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPipeline.cpp">
+      <Filter>源文件\RenderPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderAtomspherePipeline.cpp">
+      <Filter>源文件\RenderPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Atmosphere.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_demo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_tables.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_widgets.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_glfw.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_opengl3.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderDepthMappingPipeline.cpp">
+      <Filter>源文件\RenderPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="GameContext.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeOfDay.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ActorEditorAgent.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneEditorAgent.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UIForm.cpp">
+      <Filter>源文件\UI</Filter>
     </ClCompile>
     <ClCompile Include="Material.cpp">
       <Filter>源文件</Filter>

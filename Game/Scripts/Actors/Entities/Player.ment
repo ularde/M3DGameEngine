@@ -1,0 +1,4 @@
+<EntityDefinition name="Player" script="Scripts\Actors\Entities\Player.lua">
+<EntityComponent class="FirstPersonCamera" name="DefaultCamera" front="0.0,0.0,-1.0"/>
+<EntityComponent class="CapsuleShapedCharacterController" gravity="1" name="CapsuleShapedCharacterController0" camera="DefaultCamera" radius="0.4" height="1.0" max_jump_height="40.0" surface_type="plastic" step_offset="0.65" contact_offset="0.025"/>
+</EntityDefinition>

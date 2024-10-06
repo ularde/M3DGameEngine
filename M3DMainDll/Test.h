@@ -1,10 +1,9 @@
 #pragma once
 #include "glad.h" 
 #include "ShaderManager.h"
-#include "Camera.h"
 #include "Platforms.h"
 
-
+class MFreeCamera;
 class MShaderStage;
 class MVertexShaderProgram;
 class MFragmentShaderProgram;

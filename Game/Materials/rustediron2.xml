@@ -1,0 +1,9 @@
+<Material name="rustediron2">
+<SubMaterial name="default" ID="0" forward_pipeline="0" surface_type="Metal">
+<Texture type="texture_albedo" path="Textures\rustediron2\rustediron2_basecolor.png"/>
+<Texture type="texture_normal" path="Textures\rustediron2\rustediron2_normal.png"/>
+<Texture type="texture_metallic" path="Textures\rustediron2\rustediron2_metallic.png"/>
+<Texture type="texture_roughness" path="Textures\rustediron2\rustediron2_roughness.png"/>
+<Texture type="texture_AO" path="Textures\rustediron2\rustediron2_AO.png"/>
+</SubMaterial>
+</Material>

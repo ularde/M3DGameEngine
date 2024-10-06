@@ -42,16 +42,16 @@ typedef void (CALLBACK* _PIRUNMAININSTANCE)(void);
 _PIRUNMAININSTANCE PIRunMainInstance;
 
 int main() {
-	HMODULE mainDllModule = LoadLibrary(L".\\M3DMainDll.dll");
-	if (!mainDllModule) {
+	HMODULE hMainDllModule = LoadLibrary(L".\\M3DMainDll.dll");
+	if (!hMainDllModule) {
 		MessageBeep(MB_ICONERROR);
 		MessageBox(NULL, L"Failed to load DLL file : .\\M3DMainDll.dll", L"Game Launcher", MB_ICONERROR);
 		return -1;
 	}
 	else {
-		PICreateMainInterface = (_PICREATEMAININTERFACE)GetProcAddress(mainDllModule, "PICreateMainInterface");
-		PIDestroyMainInterface = (_PIDESTROYMAININSTANCE)GetProcAddress(mainDllModule, "PIDestroyMainInterface");
-		PIRunMainInstance = (_PIRUNMAININSTANCE)GetProcAddress(mainDllModule, "PIRunMainInterface");
+		PICreateMainInterface = (_PICREATEMAININTERFACE)GetProcAddress(hMainDllModule, "PICreateMainInterface");
+		PIDestroyMainInterface = (_PIDESTROYMAININSTANCE)GetProcAddress(hMainDllModule, "PIDestroyMainInterface");
+		PIRunMainInstance = (_PIRUNMAININSTANCE)GetProcAddress(hMainDllModule, "PIRunMainInterface");
 		if (!PICreateMainInterface || !PIDestroyMainInterface || !PIRunMainInstance) {
 			MessageBeep(MB_ICONERROR);
 			MessageBox(NULL, L"Failed to load functions from DLL file M3DMainDll.dll. Perhaps the file has been broken. Please replace it with another copy.", L"Game Launcher", MB_ICONERROR);

@@ -2,7 +2,7 @@
 #include "BackgroundQuad.h"
 
 MBackgroundQuad::MBackgroundQuad(MBasicPlatform* platform__) {
-	this->platform = platform__;
+	this->gPlatform = platform__;
 
 	glGenTextures(1, &this->backgroundTex);
 	glBindTexture(GL_TEXTURE_2D, this->backgroundTex);
@@ -15,12 +15,12 @@ MBackgroundQuad::MBackgroundQuad(MBasicPlatform* platform__) {
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->platform->GetWindowWidth(), this->platform->GetWindowHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->gPlatform->GetWindowWidth(), this->gPlatform->GetWindowHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glGenRenderbuffers(1, &this->RBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, this->RBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, this->platform->GetWindowWidth(), this->platform->GetWindowHeight());
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, this->gPlatform->GetWindowWidth(), this->gPlatform->GetWindowHeight());
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	glGenFramebuffers(1, &this->FBO);
@@ -28,12 +28,12 @@ MBackgroundQuad::MBackgroundQuad(MBasicPlatform* platform__) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->backgroundTex, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->RBO);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, gPlatform->gDefaultFBO);
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		MessageBox(NULL, L"Failed to create framebuffer", L"M3D Engine", MB_ICONERROR);
 	}
 	else {
-		this->platform->ConsoleWriteLine(255, 255, 255, std::wstring(L"[INFO] OpenGL : Farmebuffer has been created successfully."));
+		this->gPlatform->ConsoleWriteLine(255, 255, 255, std::string("[INFO] OpenGL : Farmebuffer has been created successfully."));
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -81,13 +81,29 @@ void MBackgroundQuad::RenderQuad() {
 	glVertex2f(1.0f, 1.0f);
 	glEnd();
 	glBindTexture(GL_TEXTURE_2D, 0);
+	//
+	if (this->enableDebugQuad) {
+		glBindTexture(GL_TEXTURE_2D, publicID);
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex2f(-0.2f, 0.2f);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex2f(-0.2f, -0.2f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2f(0.2f, -0.2f);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex2f(0.2f, 0.2f);
+		glEnd();
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 void MBackgroundQuad::BeginRender() {
-	glViewport(0, 0, this->platform->GetWindowWidth(), this->platform->GetWindowHeight());
+	glViewport(0, 0, this->gPlatform->GetWindowWidth(), this->gPlatform->GetWindowHeight());
 	glBindFramebuffer(GL_FRAMEBUFFER, this->FBO);
 }
 
 void MBackgroundQuad::EndRender() {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, gPlatform->gDefaultFBO);
 }

@@ -2,7 +2,7 @@
 #include "MatrixManager.h"
 
 MMatrixManager::MMatrixManager(MBasicPlatform* platform__, unsigned int shaderPipeline__) {
-	this->platform = platform__;
+	this->gPlatform = platform__;
 	this->shaderPipeline = shaderPipeline__;
 
 }

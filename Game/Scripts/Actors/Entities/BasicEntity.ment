@@ -1,0 +1,4 @@
+<EntityDefinition name="BasicEntity" script="Scripts\Actors\Entities\BasicEntity.lua">
+<EntityComponent class="RigidBodyPhysicsProxySphere" name="PhysicsProxy0" radius="0.5" mass_center="0.0,0.0,0.0" density="6.0" surface_type="Metal" kinematic="0"/>
+<EntityComponent class="StaticMesh" name="StaticMesh0" model="Objects\demo\sphere\sphere.obj" physics_proxy="PhysicsProxy0" position="0.0,0.0,0.0" scale="1.0,1.0,1.0" rotate="0.0,0.0,0.0"/>
+</EntityDefinition>

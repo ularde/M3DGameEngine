@@ -1,0 +1,16 @@
+<Material name="stone_wall_vkmeddz">
+<SubMaterial name="default" ID="0" forward_pipeline="0" surface_type="Metal">
+<Texture type="texture_albedo" path="Textures\megascans\wood_plank_vjisagn\vjisagn_8K_Albedo.png"/>
+<Texture type="texture_normal" path="Textures\megascans\wood_plank_vjisagn\vjisagn_8K_Normal.png"/>
+<Texture type="texture_metallic" path="Textures\default\default_metallic.png"/>
+<Texture type="texture_roughness" path="Textures\megascans\wood_plank_vjisagn\vjisagn_8K_Roughness.png"/>
+<Texture type="texture_AO" path="Textures\megascans\wood_plank_vjisagn\vjisagn_8K_AO.png"/>
+</SubMaterial>
+<SubMaterial name="default" ID="1" forward_pipeline="0" surface_type="Metal">
+<Texture type="texture_albedo" path="Textures\megascans\wood_plank_vjisagn\vjisagn_8K_Albedo.png"/>
+<Texture type="texture_normal" path="Textures\megascans\wood_plank_vjisagn\vjisagn_8K_Normal.png"/>
+<Texture type="texture_metallic" path="Textures\default\default_metallic.png"/>
+<Texture type="texture_roughness" path="Textures\megascans\wood_plank_vjisagn\vjisagn_8K_Roughness.png"/>
+<Texture type="texture_AO" path="Textures\megascans\wood_plank_vjisagn\vjisagn_8K_AO.png"/>
+</SubMaterial>
+</Material>

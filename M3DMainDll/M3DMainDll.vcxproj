@@ -80,13 +80,13 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Bin\x64;$(SolutionDir)lib\x64;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)Bin\x64</OutDir>
+    <OutDir>$(SolutionDir)Bin\x64\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Bin\x64_release;$(SolutionDir)lib\x64_release;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)Bin\x64_release</OutDir>
+    <OutDir>$(SolutionDir)Bin\x64_release\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -130,12 +130,13 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>jemallocd.lib;OPENGL32.lib;glfw3_mt.lib;freetype.lib;ftgl_static_D.lib;python3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>jemallocd.lib;lua54.lib;OPENGL32.lib;glfw3_mt.lib;freetype.lib;ftgl_static_D.lib;assimp-vc142-mtd.lib;PhysXExtensions_static_64.lib;PhysXPvdSDK_static_64.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXFoundation_64.lib;PhysXCharacterKinematic_static_64.lib;freeglut.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -148,6 +149,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -155,47 +157,97 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>jemalloc.lib;OPENGL32.lib;glfw3_mt.lib;freetype.lib;ftgl_static.lib;M3DScriptSystem.lib;python3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>jemalloc.lib;lua54.lib;OPENGL32.lib;glfw3_mt.lib;freetype.lib;ftgl_static.lib;assimp-vc142-mt.lib;PhysXExtensions_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXFoundation_64.lib;freeglut.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ActorEditorAgent.h" />
     <ClInclude Include="Actor.h" />
     <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="Atmosphere.h" />
     <ClInclude Include="BackgroundQuad.h" />
     <ClInclude Include="BasicContainer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Class.h" />
     <ClInclude Include="ConsoleOperations.h" />
+    <ClInclude Include="Entity.h" />
+    <ClInclude Include="EntityComponent.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameConsole.h" />
+    <ClInclude Include="GameContext.h" />
     <ClInclude Include="glad.h" />
+    <ClInclude Include="imconfig.h" />
+    <ClInclude Include="imgui.h" />
+    <ClInclude Include="imgui_impl_glfw.h" />
+    <ClInclude Include="imgui_impl_opengl3.h" />
+    <ClInclude Include="imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="imgui_internal.h" />
+    <ClInclude Include="imstb_rectpack.h" />
+    <ClInclude Include="imstb_textedit.h" />
+    <ClInclude Include="imstb_truetype.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MatrixManager.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="UIControl.h" />
+    <ClInclude Include="UIFormEditorAgent.h" />
+    <ClInclude Include="UIInputBox.h" />
+    <ClInclude Include="UIPopup.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PhysXInterface.h" />
     <ClInclude Include="PlatformInterface.h" />
     <ClInclude Include="Platforms.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="RenderDeferredPipeline.h" />
+    <ClInclude Include="RenderDepthMappingPipeline.h" />
+    <ClInclude Include="RenderEnvironmentPipeline.h" />
+    <ClInclude Include="RenderAtomspherePipeline.h" />
+    <ClInclude Include="RenderObject.h" />
+    <ClInclude Include="RenderOcclusionQueryPipeline.h" />
+    <ClInclude Include="RenderPipeline.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneEditorAgent.h" />
     <ClInclude Include="SharedFunc.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Test.h" />
+    <ClInclude Include="RigidStatic.h" />
+    <ClInclude Include="Skybox.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="TimeOfDay.h" />
     <ClInclude Include="tinyxml2.h" />
+    <ClInclude Include="UIButton.h" />
     <ClInclude Include="UIForm.h" />
     <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="UILabel.h" />
+    <ClInclude Include="UIListBox.h" />
+    <ClInclude Include="UITabBox.h" />
+    <ClInclude Include="UITable.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ActorEditorAgent.cpp" />
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="Atmosphere.cpp" />
     <ClCompile Include="BackgroundQuad.cpp" />
-    <ClCompile Include="BasicContainer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ConsoleOperations.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="EntityComponent.cpp" />
     <ClCompile Include="GameConsole.cpp" />
+    <ClCompile Include="GameContext.cpp" />
     <ClCompile Include="glad.cpp" />
+    <ClCompile Include="imgui.cpp" />
+    <ClCompile Include="imgui_demo.cpp" />
+    <ClCompile Include="imgui_draw.cpp" />
+    <ClCompile Include="imgui_impl_glfw.cpp" />
+    <ClCompile Include="imgui_impl_opengl3.cpp" />
+    <ClCompile Include="imgui_tables.cpp" />
+    <ClCompile Include="imgui_widgets.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MatrixManager.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -204,9 +256,18 @@
     </ClCompile>
     <ClCompile Include="PlatformInterface.cpp" />
     <ClCompile Include="Platforms.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="RenderDeferredPipeline.cpp" />
+    <ClCompile Include="RenderDepthMappingPipeline.cpp" />
+    <ClCompile Include="RenderAtomspherePipeline.cpp" />
+    <ClCompile Include="RenderPipeline.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneEditorAgent.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
-    <ClCompile Include="Test.cpp" />
+    <ClCompile Include="RigidStatic.cpp" />
+    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TimeOfDay.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="UIForm.cpp" />
     <ClCompile Include="SharedFunc.cpp" />
