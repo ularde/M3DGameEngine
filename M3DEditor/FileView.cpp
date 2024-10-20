@@ -107,21 +107,19 @@ void CFileView::FillFileView(HTREEITEM ftree, CString fn)
 	if (ftree != 0)
 	{
 		BOOL working = finder.FindFile(fn + _T("*.*"));
-
+		wchar_t* str = 0;
 		while (working)
 		{
-			wchar_t* str = 0;
 			working = finder.FindNextFile();
-			CString fpath = finder.GetFilePath();
+			CString fpath = finder.GetFilePath().GetBuffer();
+			str = (wchar_t*)malloc(sizeof(wchar_t) * (fpath.GetLength() + (size_t)1));
 			if (!finder.IsDirectory())
 			{
 				HTREEITEM file = m_wndFileView.InsertItem(finder.GetFileName(), 2, 2, ftree);
-				int len = fpath.GetLength();
-				str = (wchar_t*)malloc(sizeof(wchar_t) * len);
 #ifdef DEBUG
-				lstrcpy(str, (wchar_t*)fpath.GetString());
+				lstrcpy(str, fpath.GetBuffer());
 #else
-				memcpy(str, (wchar_t*)fpath.GetString(), sizeof(wchar_t) * len);
+				memcpy(str, fpath.GetBuffer(), sizeof(wchar_t) * (fpath.GetLength() + (size_t)1));
 #endif // DEBUG
 				m_wndFileView.SetItemData(file, (DWORD_PTR)str);
 			}
@@ -135,7 +133,6 @@ void CFileView::FillFileView(HTREEITEM ftree, CString fn)
 			}
 		}
 	}
-
 	/*
 	HTREEITEM hSrc = m_wndFileView.InsertItem(_T("FakeApp 源文件"), 0, 0, hRoot);
 
@@ -222,7 +219,6 @@ void CFileView::OnProperties()
 void CFileView::OnFileOpen()
 {
 	HTREEITEM selectedItem = m_wndFileView.GetSelectedItem();
-	wchar_t* raw = (wchar_t*)m_wndFileView.GetItemData(selectedItem);
 	CString path = (wchar_t*)m_wndFileView.GetItemData(selectedItem);
 	CString relativePath = path.Right(path.GetLength() - rootDirFullPath.GetLength());
 	CString ename = path.Right(path.GetLength() - path.ReverseFind('.'));

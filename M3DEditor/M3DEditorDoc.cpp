@@ -59,18 +59,20 @@ void CM3DEditorDoc::Serialize(CArchive& ar)
 	CString filePath = ar.GetFile()->GetFilePath();
 	if (ar.IsStoring())
 	{
-		char fn[1024] = { 0 };
-		wcstombs(fn, filePath, 1024);
+		char* fn = (char*)malloc(sizeof(char) * (filePath.GetLength() + (size_t)1));
+		wcstombs(fn, filePath, sizeof(char) * (filePath.GetLength() + (size_t)1));
 		ar.GetFile()->Close();
 		PIEditor_SaveScene(fn);
 		ar.GetFile()->Open(filePath, CFile::modeRead);
+		free(fn);
 	}
 	else
 	{
-		char fn[1024] = { 0 };
-		wcstombs(fn, filePath, 1024);
+		char* fn = (char*)malloc(sizeof(char) * (filePath.GetLength() + (size_t)1));
+		wcstombs(fn, filePath, sizeof(char) * (filePath.GetLength() + (size_t)1));
 		PIEditor_LoadScene(fn);
 		PIEditor_ExitGame();
+		free(fn);
 	}
 }
 
