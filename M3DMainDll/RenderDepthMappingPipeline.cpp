@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "RenderDepthMappingPipeline.h"
 #include "Platforms.h"
+#include "Model.h"
 #include "ShaderManager.h"
 
 MRenderDepthMappingPipeline::MRenderDepthMappingPipeline(MBasicPlatform* platform) {
@@ -38,8 +39,8 @@ MRenderDepthMappingPipeline::MRenderDepthMappingPipeline(MBasicPlatform* platfor
 	glBindFramebuffer(GL_FRAMEBUFFER, gPlatform->gDefaultFBO);
 }
 
-MRenderDepthMappingPipeline::~MRenderDepthMappingPipeline()
-{
+MRenderDepthMappingPipeline::~MRenderDepthMappingPipeline() {
+
 }
 
 void MRenderDepthMappingPipeline::DisableColorMask()
@@ -56,17 +57,69 @@ void MRenderDepthMappingPipeline::SendMatricesToShader() {
 	mShader->UniformMat4("model", gCurrentModel);
 }
 
-void MRenderDepthMappingPipeline::BeginRendering() {
+void MRenderDepthMappingPipeline::RenderQueueGeometryInstances() {
 	glBindFramebuffer(GL_FRAMEBUFFER, mDepthFBO);
+	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	mShader->Use();
 	glViewport(0, 0, gDepthMapWidth, gDepthMapHeight);
-}
 
-void MRenderDepthMappingPipeline::EndRendering() {
+	for (auto i = 0u; i < gGeometryInstanceQueue.size(); i++) {
+		if (gGeometryInstanceQueue[i].mOwner->IsRigidStatic()) {
+			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gGeometryInstanceQueue[i].mShape);
+			MRigidStatic* rs = reinterpret_cast<MRigidStatic*>(gGeometryInstanceQueue[i].mOwner);
+			LoadMatrix(MMatrixType::MODEL, rs->mModelMatrix);
+			mesh->Render();
+		}
+		else if (gGeometryInstanceQueue[i].mOwner->IsStaticMeshComponent()) {
+			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gGeometryInstanceQueue[i].mShape);
+			MStaticMeshComponent* mc = reinterpret_cast<MStaticMeshComponent*>(gGeometryInstanceQueue[i].mOwner);
+			if (mc->mPhysicsProxy) {
+				LoadMatrix(MMatrixType::MODEL, mc->mPhysicsProxy->GetModelMatrix());
+			}
+			mesh->Render();
+		}
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, gPlatform->gDefaultFBO);
 	glCullFace(GL_BACK);
 	glViewport(0, 0, gPlatform->GetWindowWidth(), gPlatform->GetWindowHeight());
+}
+
+void MRenderDepthMappingPipeline::AddGeometryInstanceToQueue(MGeometryInstance mesh) {
+	gGeometryInstanceQueue.push_back(mesh);
+}
+
+void MRenderDepthMappingPipeline::ClearGeometryInstanceQueue() {
+	gGeometryInstanceQueue.clear();
+	gGeometryInstanceQueue.shrink_to_fit();
+}
+
+void MRenderDepthMappingPipeline::UpdateDepthMappingSize() {
+	gDepthMapWidth = 1024 * gPlatform->gShadowQuality;
+	gDepthMapHeight = 1024 * gPlatform->gShadowQuality;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, gPlatform->gDefaultFBO);
+
+	glBindTexture(GL_TEXTURE_2D, this->mDepthTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, gDepthMapWidth, gDepthMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, this->mDepthFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->mDepthTex, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		MessageBox(NULL, L"Failed to create framebuffer for shadow mapping.", L"ERROR", MB_ICONERROR);
+	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, gPlatform->gDefaultFBO);
 }
 
 void MRenderDepthMappingPipeline::SetLightSpaceMatrix(const glm::mat4& matrix) {

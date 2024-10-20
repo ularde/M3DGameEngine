@@ -1,0 +1,6 @@
+<Scene name="M2012Level" script="Scripts\Gameplay\m2012level.lua">
+    <TimeOfDay dynamic="0" speed="100" xoffset="0.52399999" iSun="22" rPlanet="6371000" rAtmos="6471000" kRlh="0.000006,0.000013,0.000022" kMie="2.1e-05" shRlh="8000" shMie="1200" g="0.75800002"/>
+    <Actor class="Entity" name="LocalPlayer" def="Scripts\Actors\Entities\M2012Camera.ment" position="6.000000,10.000000,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="Ground0" model="Objects\floor2\floor2.obj" material="" position="0.000000,-0.827920,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic1" model="Objects\demo\d0\attack-helicopter.obj" material="materials\white_model.mmtl" position="-0.330745,-1.104604,-0.408539" scale="1.000000,1.000000,1.000000" rotate="-0.085111,0.000000,0.000000,0.996372"/>
+</Scene>

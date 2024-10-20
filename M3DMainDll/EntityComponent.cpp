@@ -9,27 +9,28 @@
 #include "RenderAtomspherePipeline.h"
 #include "RenderDepthMappingPipeline.h"
 
-MStaticMesh::MStaticMesh(MEntity* parent_, MEntityComponent* physics_proxy,
+MStaticMeshComponent::MStaticMeshComponent(MEntity* parent_, MEntityComponent* physics_proxy,
 	const std::string& name_, const std::string& model_path_, 
-	const glm::vec3& position_, const glm::vec3& scale_, const glm::vec3& rotate_) {
-	this->mClassName = "StaticMesh";
-	this->mFatherClassName = "EntityComponent";
+	const glm::vec3& position_, const glm::vec3& scale_, const glm::vec4& rotate_) {
+	this->mClassName = "StaticMeshComponent";
+	this->mPrototypeName = "EntityComponent";
 	this->name = name_;
 	this->mParent = parent_;
 	this->gPlatform = mParent->GetPlatform();
 	this->gAssetManager = this->gPlatform->gAssetManager;
 	this->mPhysicsProxy = reinterpret_cast<MRigidBodyPhysicsProxy*>(physics_proxy);
 	this->mModelPath = model_path_;
-	position = position_;
+	mPosition = position_;
+	mRotate = rotate_;
 	this->LoadModelAsset();
 	this->GeneratePublicFunctionNames();
 }
 
-MStaticMesh::~MStaticMesh()
+MStaticMeshComponent::~MStaticMeshComponent()
 {
 }
 
-void MStaticMesh::LoadModelAsset() {
+void MStaticMeshComponent::LoadModelAsset() {
 	this->model = this->gAssetManager->AddModel(true, "model_static", this->mModelPath, (char*)GenerateGuidA());
 
 	if (!this->model) {
@@ -37,28 +38,20 @@ void MStaticMesh::LoadModelAsset() {
 	}
 }
 
-void MStaticMesh::Update(double delta_time) {
-	if (!this->mPhysicsProxy->mClientAssigned) {
-		this->mPhysicsProxy->SetClient(this->name);
+void MStaticMeshComponent::Update(double dt) {
+	this->OnUpdate(dt);
+	model->DeclareOccupation(this);
+	if (!this->mPhysicsProxy->mOutputMeshAttachmentAssigned) {
+		this->mPhysicsProxy->SetOutputAttachment(this->name);
 	}
-}
-
-void MStaticMesh::Render() {
 	glm::mat4 modelMatrix = mPhysicsProxy->GetModelMatrix();
 	gPlatform->gDeferredPipeline->LoadMatrix(MMatrixType::MODEL, modelMatrix);
-	if (this->mPhysicsProxy->mClientAssigned && this->model) {
+	gPlatform->gForwardPipeline->LoadMatrix(MMatrixType::MODEL, modelMatrix);
+	if (this->mPhysicsProxy->mOutputMeshAttachmentAssigned && this->model) {
 		this->model->PushUseCustomMaterialFlag();
 		this->model->SetUseCustomMaterialFlag(false);
-		this->model->Render();
+		this->model->CommitGeometryInstances();
 		this->model->PopUseCustomMaterialFlag();
-	}
-}
-
-void MStaticMesh::RenderForDepthMapping() {
-	glm::mat4 modelMatrix = mPhysicsProxy->GetModelMatrix();
-	gPlatform->gDepthMappingPipeline->SetModelMatrix(modelMatrix);
-	if (this->mPhysicsProxy->mClientAssigned && this->model) {
-		this->model->RenderForDepthMapping();
 	}
 }
 
@@ -66,7 +59,7 @@ MRigidBodyPhysicsProxySphere::MRigidBodyPhysicsProxySphere(MEntity* parent_, con
 	float radius_, float density_, const glm::vec3& mass_center_,
 	int surface_type_ID) {
 	mClassName = "RigidBodyPhysicsProxySphere";
-	mFatherClassName = "EntityComponent";
+	mPrototypeName = "EntityComponent";
 	name = name_;
 	mRadius = radius_;
 	mDensity = density_;
@@ -83,7 +76,7 @@ MRigidBodyPhysicsProxySphere::MRigidBodyPhysicsProxySphere(MEntity* parent_, con
 	float radius_, float density_, const glm::vec3& mass_center_,
 	int surface_type_ID, bool is_kinematic) {
 	mClassName = "RigidBodyPhysicsProxySphere";
-	mFatherClassName = "EntityComponent";
+	mPrototypeName = "EntityComponent";
 	name = name_;
 	mRadius = radius_;
 	mDensity = density_;
@@ -107,14 +100,10 @@ void MRigidBodyPhysicsProxySphere::Update(double dt) {
 	}
 }
 
-void MRigidBodyPhysicsProxySphere::Render() {
-	this->OnRender();
-}
-
-void MRigidBodyPhysicsProxySphere::SetClient(const std::string& name) {
-	this->mClient = reinterpret_cast<MMeshComponent*>(this->mParent->componentMap[name]);
-	if (mClient) {
-		this->mClientAssigned = true;
+void MRigidBodyPhysicsProxySphere::SetOutputAttachment(const std::string& name) {
+	this->mOutputMeshAttachment = reinterpret_cast<MMeshComponent*>(this->mParent->componentMap[name]);
+	if (mOutputMeshAttachment) {
+		this->mOutputMeshAttachmentAssigned = true;
 	}
 }
 
@@ -122,12 +111,10 @@ glm::mat4 MRigidBodyPhysicsProxySphere::GetModelMatrix() {
 	if (this->pActor) {
 		physx::PxTransform worldTransform = this->pActor->getGlobalPose();
 
-		physx::PxVec3 localPos(this->mClient->position.x, this->mClient->position.y, this->mClient->position.z);
-		physx::PxQuat localRot(glm::radians(this->mClient->rotate.x),
-			glm::radians(this->mClient->rotate.x),
-			glm::radians(this->mClient->rotate.x), 1.0f);
+		physx::PxVec3 localPos(this->mOutputMeshAttachment->mPosition.x, this->mOutputMeshAttachment->mPosition.y, this->mOutputMeshAttachment->mPosition.z);
+		physx::PxQuat localRot(this->mOutputMeshAttachment->mRotate.x, this->mOutputMeshAttachment->mRotate.y, this->mOutputMeshAttachment->mRotate.z, this->mOutputMeshAttachment->mRotate.w);
 
-		physx::PxTransform localTransform(localPos);//, localRot);
+		physx::PxTransform localTransform(localPos, localRot);//, localRot);
 
 		worldTransform *= localTransform;
 
@@ -162,21 +149,17 @@ void MRigidBodyPhysicsProxySphere::InitializePhysics() {
 		break;
 	}
 
-	if (this->mClientAssigned) {
-		if (this->mClient->mClassName == "StaticMesh") {
-			MStaticMesh* aStaticMesh = reinterpret_cast<MStaticMesh*>(this->mClient);
+	if (this->mOutputMeshAttachmentAssigned) {
+		if (this->mOutputMeshAttachment->mClassName == "StaticMeshComponent") {
+			MStaticMeshComponent* aStaticMesh = reinterpret_cast<MStaticMeshComponent*>(this->mOutputMeshAttachment);
 
-			physx::PxVec3 worldPos(this->mParent->position.x, this->mParent->position.y, this->mParent->position.z);
-			physx::PxQuat worldRot(glm::radians(this->mParent->rotate.x),
-				glm::radians(this->mParent->rotate.y),
-				glm::radians(this->mParent->rotate.z), 1.0f);
-			physx::PxTransform worldTransform(worldPos, worldRot);
+			physx::PxVec3 worldPos(this->mParent->mPosition.x, this->mParent->mPosition.y, this->mParent->mPosition.z);
+			physx::PxQuat worldRot(this->mParent->mRotate.x, this->mParent->mRotate.y, this->mParent->mRotate.z, this->mParent->mRotate.w);
+			physx::PxTransform worldTransform(worldPos, worldRot);// , worldRot);
 
-			physx::PxVec3 localPos(physx::PxVec3(aStaticMesh->position.x, aStaticMesh->position.y, aStaticMesh->position.z));
-			physx::PxQuat localRot(glm::radians(aStaticMesh->rotate.x),
-				glm::radians(aStaticMesh->rotate.y),
-				glm::radians(aStaticMesh->rotate.z), 1.0f);
-			physx::PxTransform localTransform(localPos);// , localRot);
+			physx::PxVec3 localPos(physx::PxVec3(aStaticMesh->mPosition.x, aStaticMesh->mPosition.y, aStaticMesh->mPosition.z));
+			physx::PxQuat localRot(aStaticMesh->mRotate.x, aStaticMesh->mRotate.y, aStaticMesh->mRotate.z, aStaticMesh->mRotate.w);
+			physx::PxTransform localTransform(localPos, localRot);// , localRot);
 
 			physx::PxVec3 pMassCenter(this->mMassCenter.x, this->mMassCenter.y, this->mMassCenter.z);
 
@@ -207,7 +190,7 @@ MCharacterController::MCharacterController(MEntity* parent,
 	mRadius = radius;
 	mSurfaceTypeID = surface_type_ID;
 	mClassName = "CharacterController";
-	mFatherClassName = "EntityComponent";
+	mPrototypeName = "EntityComponent";
 	mMaxJumpHeight = max_jump_height;
 	this->name = name;
 
@@ -233,11 +216,11 @@ MCharacterController::MCharacterController(MEntity* parent,
 		break;
 	}
 
-	mCameraAttachment = camera;
-	mCameraAttached = true;
-	mCameraAttachment->SetHost(this);
+	mInputCameraAttachment = camera;
+	mInputCameraAttached = true;
+	mInputCameraAttachment->SetOwner(this);
 
-	if (this->mCameraAttached) {
+	if (this->mInputCameraAttached) {
 		physx::PxCapsuleControllerDesc desc;
 		desc.contactOffset = contact_offset;
 		desc.height = height;
@@ -246,7 +229,7 @@ MCharacterController::MCharacterController(MEntity* parent,
 		desc.userData = (void*)this;
 		desc.material = pMaterial;
 		desc.upDirection = physx::PxVec3(0.0f, 1.0f, 0.0f);
-		desc.position = physx::PxExtendedVec3(mParent->position.x, mParent->position.y, mParent->position.z);
+		desc.position = physx::PxExtendedVec3(mParent->mPosition.x, mParent->mPosition.y, mParent->mPosition.z);
 		desc.stepOffset = step_offset;
 		desc.invisibleWallHeight = 0.0f;
 		desc.behaviorCallback = NULL;
@@ -287,14 +270,10 @@ void MCharacterController::Update(double dt) {
 	mEyePosition = glm::vec3(footPosition.x, footPosition.y + mHeight + 2.0 * mRadius - 0.1, footPosition.z);
 }
 
-void MCharacterController::Render() {
-	this->OnRender();
-}
-
-void MCharacterController::SetClient(const std::string& name) {
-	this->mClient = reinterpret_cast<MMeshComponent*>(this->mParent->componentMap[name]);
-	if (mClient) {
-		this->mClientAssigned = true;
+void MCharacterController::SetOutputAttachment(const std::string& name) {
+	this->mOutputMeshAttachment = reinterpret_cast<MMeshComponent*>(this->mParent->componentMap[name]);
+	if (mOutputMeshAttachment) {
+		this->mOutputMeshAttachmentAssigned = true;
 	}
 }
 
@@ -303,48 +282,48 @@ glm::mat4 MCharacterController::GetModelMatrix() {
 	model = glm::translate(model, glm::vec3(pController->getFootPosition().x,
 		pController->getFootPosition().y,
 		pController->getFootPosition().z));
-	if (this->mClient) {
-		model = glm::translate(model, glm::vec3(mClient->position.x, mClient->position.y, mClient->position.z));
+	if (this->mOutputMeshAttachment) {
+		model = glm::translate(model, glm::vec3(mOutputMeshAttachment->mPosition.x, mOutputMeshAttachment->mPosition.y, mOutputMeshAttachment->mPosition.z));
 	}
 	return model;
 }
 
 void MCharacterController::AttachCamera(const std::string& name) {
-	this->mCameraAttachment = reinterpret_cast<MCameraComponent*>(this->mParent->componentMap[name]);
-	this->mCameraAttached = true;
+	this->mInputCameraAttachment = reinterpret_cast<MCameraComponent*>(this->mParent->componentMap[name]);
+	this->mInputCameraAttached = true;
 }
 
 void MCharacterController::Move(MCCTMovementType type, double dt) {
 	static int n = 0;
-	if (mCameraAttached) {
+	if (mInputCameraAttached) {
 		switch (type)
 		{
 		case MCCTMovementType::FORWARD:
 			pController->move(
-				physx::PxVec3(mCameraAttachment->mMovementFront.x,
+				physx::PxVec3(mInputCameraAttachment->mMovementFront.x,
 					0.0f,
-					mCameraAttachment->mMovementFront.z) * dt * 4.0f, dt, dt,
+					mInputCameraAttachment->mMovementFront.z) * dt * 4.0f, dt, dt,
 				0);
 			break;
 		case MCCTMovementType::BACKWARD:
 			pController->move(
-				-physx::PxVec3(mCameraAttachment->mMovementFront.x,
+				-physx::PxVec3(mInputCameraAttachment->mMovementFront.x,
 					0.0f,
-					mCameraAttachment->mMovementFront.z) * dt * 4.0f, dt, dt,
+					mInputCameraAttachment->mMovementFront.z) * dt * 4.0f, dt, dt,
 				0);
 			break;
 		case MCCTMovementType::LEFT:
 			pController->move(
-				-physx::PxVec3(mCameraAttachment->mMovementRight.x,
+				-physx::PxVec3(mInputCameraAttachment->mMovementRight.x,
 					0.0f,
-					mCameraAttachment->mMovementRight.z) * dt * 4.0f, dt, dt,
+					mInputCameraAttachment->mMovementRight.z) * dt * 4.0f, dt, dt,
 				0);
 			break;
 		case MCCTMovementType::RIGHT:
 			pController->move(
-				physx::PxVec3(mCameraAttachment->mMovementRight.x,
+				physx::PxVec3(mInputCameraAttachment->mMovementRight.x,
 					0.0f,
-					mCameraAttachment->mMovementRight.z) * dt * 4.0f, dt, dt,
+					mInputCameraAttachment->mMovementRight.z) * dt * 4.0f, dt, dt,
 				0);
 			break;
 		case MCCTMovementType::UPWARD:
@@ -361,18 +340,18 @@ void MCharacterController::Move(MCCTMovementType type, double dt) {
 bool MCharacterController::IsGrounded() {
 	return mParent->mParent->pScene->raycast(physx::PxVec3(pController->getFootPosition().x, pController->getFootPosition().y + this->pController->getContactOffset(), pController->getFootPosition().z),
 		physx::PxVec3(0.0f, -1.0f, 0.0f),
-		0.5f - this->pController->getContactOffset(), mGroundHit);
+		this->pController->getContactOffset() * 2.0f, mGroundHit);
 }
 
 MFirstPersonCamera::MFirstPersonCamera(MEntity* parent, const std::string& name,
 	const glm::vec3& i_front) {
 	mParent = parent;
 	this->name = name;
-	mPosition = mParent->position;
+	mPosition = mParent->mPosition;
 	mFront = glm::vec3(0.0f, 0.0f, -1.0f);
 	mUpDirection = glm::vec3(0.0f, 1.0f, 0.0f);
 	mClassName = "FirstPersonCamera";
-	mFatherClassName = "EntityComponent";
+	mPrototypeName = "EntityComponent";
 	gPlatform = mParent->GetPlatform();
 	mWorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	this->GeneratePublicFunctionNames();
@@ -388,14 +367,10 @@ void MFirstPersonCamera::Update(double dt) {
 	if (!mParent->mParent->IsEditorMode()) {
 		this->OnUpdate(dt);
 		ProcessMovement(dt);
-		if (mHostAssigned) {
-			mPosition = mHost->GetEyePosition();
+		if (mOwned) {
+			mPosition = mOwner->GetEyePosition();
 		}
 	}
-}
-
-void MFirstPersonCamera::Render() {
-	this->OnRender();
 }
 
 void MFirstPersonCamera::SubmitMousePosition(double xpos, double ypos) {
@@ -438,45 +413,45 @@ void MFirstPersonCamera::ProcessMovement(double dt) {
 		gPlatform->SetCursorVisible();
 	}
 
-	if (mHostAssigned) {
+	if (mOwned) {
 		if (this->gPlatform->GetKey(GLFW_KEY_W) == GLFW_PRESS) {
-			mHost->Move(MCCTMovementType::FORWARD, dt);
+			mOwner->Move(MCCTMovementType::FORWARD, dt);
 			if (this->gPlatform->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS && !n) {
 				n += 1;
-				mHost->Move(MCCTMovementType::UPWARD, dt);
+				mOwner->Move(MCCTMovementType::UPWARD, dt);
 			}
 		}
 		else if (this->gPlatform->GetKey(GLFW_KEY_A) == GLFW_PRESS) {
-			mHost->Move(MCCTMovementType::LEFT, dt);
+			mOwner->Move(MCCTMovementType::LEFT, dt);
 			if (this->gPlatform->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS && !n) {
 				n += 1;
-				mHost->Move(MCCTMovementType::UPWARD, dt);
+				mOwner->Move(MCCTMovementType::UPWARD, dt);
 			}
 		}
 		else if (this->gPlatform->GetKey(GLFW_KEY_S) == GLFW_PRESS) {
-			mHost->Move(MCCTMovementType::BACKWARD, dt);
+			mOwner->Move(MCCTMovementType::BACKWARD, dt);
 			if (this->gPlatform->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS && !n) {
 				n += 1;
-				mHost->Move(MCCTMovementType::UPWARD, dt);
+				mOwner->Move(MCCTMovementType::UPWARD, dt);
 			}
 		}
 		else if (this->gPlatform->GetKey(GLFW_KEY_D) == GLFW_PRESS) {
-			mHost->Move(MCCTMovementType::RIGHT, dt);
+			mOwner->Move(MCCTMovementType::RIGHT, dt);
 			if (this->gPlatform->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS && !n) {
 				n += 1;
-				mHost->Move(MCCTMovementType::UPWARD, dt);
+				mOwner->Move(MCCTMovementType::UPWARD, dt);
 			}
 		}
 		else if (this->gPlatform->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS && !n) {
 			n += 1;
-			mHost->Move(MCCTMovementType::UPWARD, dt);
+			mOwner->Move(MCCTMovementType::UPWARD, dt);
 		}
 		if (this->gPlatform->GetKey(GLFW_KEY_SPACE) == GLFW_RELEASE && n) {
 			n = 0;
 		}
 		//gravity
-		mHost->yVelocity += mHost->cGravity * dt;
-		mHost->GetPxController()->move(physx::PxVec3(0.0f, mHost->yVelocity, 0.0f) * dt, dt, dt, 0);
+		mOwner->yVelocity += mOwner->cGravity * dt;
+		mOwner->GetPxController()->move(physx::PxVec3(0.0f, mOwner->yVelocity, 0.0f) * dt, dt, dt, 0);
 	}
 }
 
@@ -488,9 +463,9 @@ glm::mat4 MFirstPersonCamera::GetProjectionMatrix() {
 	return glm::perspective(glm::radians(60.0f), (float)this->gPlatform->GetWindowWidth() / (float)this->gPlatform->GetWindowHeight(), 0.1f, 1000.0f);
 }
 
-void MCameraComponent::SetHost(MCharacterController* obj) {
-	this->mHost = obj;
-	this->mHostAssigned = true;
+void MCameraComponent::SetOwner(MCharacterController* obj) {
+	this->mOwner = obj;
+	this->mOwned = true;
 }
 
 void MCameraComponent::GeneratePrivateFunctionNames() {
@@ -550,11 +525,11 @@ void MRigidBodyPhysicsProxy::Validate() {
 MCinematicCamera::MCinematicCamera(MEntity* parent, const std::string& name, const glm::vec3& i_front) {
 	mParent = parent;
 	this->name = name;
-	mPosition = mParent->position;
+	mPosition = mParent->mPosition;
 	mFront = glm::vec3(0.0f, 0.0f, -1.0f);
 	mUpDirection = glm::vec3(0.0f, 1.0f, 0.0f);
 	mClassName = "CinematicCamera";
-	mFatherClassName = "EntityComponent";
+	mPrototypeName = "EntityComponent";
 	gPlatform = mParent->GetPlatform();
 	mWorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	this->GeneratePublicFunctionNames();
@@ -584,10 +559,6 @@ void MCinematicCamera::SetFovy(const double fovy) {
 
 void MCinematicCamera::Update(double dt) {
 	this->OnUpdate(dt);
-}
-
-void MCinematicCamera::Render() {
-	this->OnRender();
 }
 
 void MCinematicCamera::SubmitMousePosition(double xpos, double ypos) {
@@ -630,14 +601,6 @@ void MEntityComponent::OnUpdate(double dt) {
 		mParent->mThisComponent = this;
 		SetThisComponent();
 		(*gPlatform->gLuaState)[nOnUpdate](dt);
-	}
-}
-
-void MEntityComponent::OnRender() {
-	if (!mParent->mParent->IsEditorMode()) {
-		mParent->mThisComponent = this;
-		SetThisComponent();
-		(*gPlatform->gLuaState)[nOnRender]();
 	}
 }
 

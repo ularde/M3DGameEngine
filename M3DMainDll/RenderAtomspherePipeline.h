@@ -9,14 +9,13 @@ public:
 	MRenderAtomspherePipeline(MBasicPlatform* platform);
 	~MRenderAtomspherePipeline();
 	void AddNewShader(const std::string& name, const std::string& path);
-	GLuint GetForwardRenderingResultTextureID() { return mAtomsphereResult; }
+	GLuint GetAtomsphereRenderingResultTextureID() { return mAtomsphereResult; }
 	GLuint GetForwardRenderingFramebufferID() { return mAtomsphereFrambuffer; }
 	void SelectShader(const std::string& shader);
 	void ClearBuffers();
 	MShaderProgram* GetCurrentAtomsphereShader() { return gCurrentAtomsphereShader; }
 	virtual void UpdateFramebufferSize()override;
-	virtual void BeginRendering()override;
-	virtual void EndRendering()override;
+	virtual void RenderQueueGeometryInstances()override;
 	virtual void SendMatricesToShader()override;
 	virtual void DisableColorMask()override;
 	virtual void EnableColorMask()override;
@@ -27,4 +26,5 @@ protected:
 	MShaderProgram* gCurrentAtomsphereShader = NULL;
 	std::vector<MShaderProgram*>mShaders;
 	std::unordered_map<std::string, MShaderProgram*>mShaderTable;
+	void RenderSphere();
 };

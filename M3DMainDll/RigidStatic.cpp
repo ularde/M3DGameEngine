@@ -13,13 +13,13 @@ class MActor;
 class MScene;
 
 MRigidStatic::MRigidStatic(MScene* scene_, const std::string& name_, const std::string& model_path, const std::string& material_path,
-	const glm::vec3& position_, const glm::vec3& scale_, const glm::vec3& rotate_) {
-	this->name = name_;
+	const glm::vec3& position_, const glm::vec3& scale_, const glm::vec4& rotate_) {
+	this->mName = name_;
 	this->mParent = scene_;
 	this->gPlatform = scene_->GetPlatform();
-	this->position = position_;
-	this->scale = scale_;
-	this->rotate = rotate_;
+	this->mPosition = position_;
+	this->mScale = scale_;
+	this->mRotate = rotate_;
 	this->mModelPath = model_path;
 	this->mMaterialPath = material_path;
 	this->mClassName = "RigidStatic";
@@ -38,10 +38,8 @@ MRigidStatic::~MRigidStatic()
 }
 
 void MRigidStatic::Update(double dt) {
+	mModel->DeclareOccupation(this);
 	mModelMatrix = ConvertPxMat44ToGLMMat4(physx::PxMat44(pActor->getGlobalPose()));
-}
-
-void MRigidStatic::Render() {
 	gPlatform->gDeferredPipeline->LoadMatrix(MMatrixType::MODEL, mModelMatrix);
 	this->mModel->PushUseCustomMaterialFlag();
 	if (this->mCustomMaterial) {
@@ -51,18 +49,15 @@ void MRigidStatic::Render() {
 	else {
 		this->mModel->SetUseCustomMaterialFlag(false);
 	}
-	this->mModel->Render();
+	mModel->CommitGeometryInstances();
 	this->mModel->PopUseCustomMaterialFlag();
 }
 
-void MRigidStatic::RenderForDepthMapping() {
-	gPlatform->gDepthMappingPipeline->SetModelMatrix(mModelMatrix);
-	mModel->RenderForDepthMapping();
-}
-
 void MRigidStatic::InitializePhysics() {
-	this->pActor = this->gPlatform->pPhysics->createRigidStatic(physx::PxTransform(position.x, position.y, position.z,
-		physx::PxQuat(rotate.x, rotate.y, rotate.z, 1.0f)));
+	physx::PxQuat localRot(mRotate.x, mRotate.y, mRotate.z, mRotate.w);
+
+	this->pActor = this->gPlatform->pPhysics->createRigidStatic(physx::PxTransform(physx::PxVec3(mPosition.x, mPosition.y, mPosition.z),
+		localRot));
 	assert(this->pActor);
 
 	for (unsigned int i = 0; i < this->mModel->GetMeshCount(); i++) {
@@ -98,7 +93,6 @@ void MRigidStatic::InitializePhysics() {
 			shape->release();
 		}
 	}
-
 	this->mParent->pScene->addActor(*this->pActor);
 }
 
@@ -107,8 +101,8 @@ void MRigidStatic::Save() {
 }
 
 void MRigidStatic::UpdatePositionWhileCreating(const physx::PxVec3& pos) {
-	this->position = glm::vec3(pos.x, pos.y, pos.z);
-	this->mEditorAgent->SetPosition(position);
+	this->mPosition = glm::vec3(pos.x, pos.y, pos.z);
+	this->mEditorAgent->SetPosition(mPosition);
 	physx::PxTransform t(pos);
 	this->pActor->setGlobalPose(t);
 }

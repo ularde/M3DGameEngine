@@ -16,8 +16,10 @@
 #include "RenderOcclusionQueryPipeline.h"
 #include "RenderEnvironmentPipeline.h"
 #include "RenderDepthMappingPipeline.h"
+#include "RenderGuiPipeline.h"
 #include "Atmosphere.h"
 #include "GameContext.h"
+#include "GuiContext.h"
 #include "ActorEditorAgent.h"
 #include "SceneEditorAgent.h"
 #include "Entity.h"
@@ -29,13 +31,62 @@
 
 class MRenderDeferredPipeline;
 class MRenderAtomspherePipeline;
+class MRenderGuiPipeline;
 class MDirectionalLight;
 class MScene;
 class MPointLight;
 class MPlayer;
 class MRigidStatic;
 
+static HMODULE libMGL;
+typedef void* (APIENTRYP PFNMWGLGETPROCADDRESS)(const char*);
+static PFNMWGLGETPROCADDRESS mwglGetProcAddress;
+typedef HGLRC(APIENTRYP PFNMWGLCREATECONTEXT)(HDC);
+static PFNMWGLCREATECONTEXT mwglCreateContext;
+typedef HGLRC(APIENTRYP PFNMWGLGETCURRENTCONTEXT)(void);
+static PFNMWGLGETCURRENTCONTEXT mwglGetCurrentContext;
+typedef BOOL(APIENTRYP PFNMWGLMAKECURRENT)(HDC, HGLRC);
+static PFNMWGLMAKECURRENT mwglMakeCurrent;
+typedef BOOL(APIENTRYP PFNMWGLDELETECONTEXT)(HGLRC);
+static PFNMWGLDELETECONTEXT mwglDeleteContext;
+typedef HDC(APIENTRYP PFNWGLGETCURRENTDC)(void);
+static PFNWGLGETCURRENTDC mwglGetCurrentDC;
+typedef BOOL(APIENTRYP PFNMWGLSWAPBUFFERS)(HDC);
+static PFNMWGLSWAPBUFFERS mwglSwapBuffers;
+typedef BOOL(APIENTRYP PFNMWGLSWAPLAYERBUFFERS)(HDC, UINT);
+static PFNMWGLSWAPLAYERBUFFERS mwglSwapLayerBuffers;
+typedef int(APIENTRYP PFNMWGLCHOOSEPIXELFORMAT)(HDC, PIXELFORMATDESCRIPTOR*);
+static PFNMWGLCHOOSEPIXELFORMAT mwglChoosePixelFormat;
+typedef BOOL(APIENTRYP PFNMWGLSETPIXELFORMAT)(HDC, int, PIXELFORMATDESCRIPTOR*);
+static PFNMWGLSETPIXELFORMAT mwglSetPixelFormat;
+
+static int InitializeMesa3D(void) {
+	libMGL = LoadLibrary(L"mogl32.dll");
+	if (libMGL != NULL) {
+		mwglChoosePixelFormat = (PFNMWGLCHOOSEPIXELFORMAT)GetProcAddress(libMGL, "wglChoosePixelFormat");
+		mwglSetPixelFormat = (PFNMWGLSETPIXELFORMAT)GetProcAddress(libMGL, "wglSetPixelFormat");
+		mwglCreateContext = (PFNMWGLCREATECONTEXT)GetProcAddress(libMGL, "wglCreateContext");
+		mwglMakeCurrent = (PFNMWGLMAKECURRENT)GetProcAddress(libMGL, "wglMakeCurrent");
+		mwglDeleteContext = (PFNMWGLDELETECONTEXT)GetProcAddress(libMGL, "wglDeleteContext");
+		mwglGetCurrentDC = (PFNWGLGETCURRENTDC)GetProcAddress(libMGL, "wglGetCurrentDC");
+		mwglGetCurrentContext = (PFNMWGLGETCURRENTCONTEXT)GetProcAddress(libMGL, "wglGetCurrentContext");
+		mwglGetProcAddress = (PFNMWGLGETPROCADDRESS)GetProcAddress(libMGL, "wglGetProcAddress");
+		mwglSwapBuffers = (PFNMWGLSWAPBUFFERS)GetProcAddress(libMGL, "wglSwapBuffers");
+		mwglSwapLayerBuffers = (PFNMWGLSWAPLAYERBUFFERS)GetProcAddress(libMGL, "wglSwapLayerBuffers");
+		return mwglGetProcAddress != NULL;
+	}
+	return 0;
+}
+
+static void mclose_gl(void) {
+	if (libMGL != NULL) {
+		FreeLibrary((HMODULE)libMGL);
+		libMGL = NULL;
+	}
+}
+
 MOfflineGame::MOfflineGame(unsigned int OS) {
+	gType = MPlatformType::GAME;
 	this->gLuaState = new sol::state();
 	this->gLuaState->open_libraries(sol::lib::base);
 
@@ -43,11 +94,17 @@ MOfflineGame::MOfflineGame(unsigned int OS) {
 
 	this->LoadGlobalConfig();
 
+	GetPrivateProfileString(L"Graphics", L"Driver", L"Default", gDriver, 1024, GetFullAssetPathW(L"system.ini"));
 	gFullscreenFlag = GetPrivateProfileInt(L"Graphics", L"Fullscreen", 0, GetFullAssetPathW(L"system.ini"));
 	gShadowQuality = GetPrivateProfileInt(L"Graphics", L"ShadowQuality", 0, GetFullAssetPathW(L"system.ini"));
 	gAtmosphereQuality = GetPrivateProfileInt(L"Graphics", L"AtomsphereQuality", 0, GetFullAssetPathW(L"system.ini"));
 	gFramebufferWidth = GetPrivateProfileInt(L"Graphics", L"WindowWidth", 0, GetFullAssetPathW(L"system.ini"));
 	gFramebufferHeight = GetPrivateProfileInt(L"Graphics", L"WindowHeight", 0, GetFullAssetPathW(L"system.ini"));
+	gSSDOFlag = GetPrivateProfileInt(L"Graphics", L"SSDO", 0, GetFullAssetPathW(L"system.ini"));
+
+	if (wcsncmp(gDriver, L"Gallium", 1024) == 0) {
+		gGalliumFlag = true;
+	}
 
 	std::string mainModulePath = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("main_script");
 	std::string windowTitle = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("title");
@@ -73,27 +130,77 @@ MOfflineGame::MOfflineGame(unsigned int OS) {
 	}
 	
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	this->window = glfwCreateWindow(this->gFramebufferWidth, this->gFramebufferHeight, windowTitle.c_str(), NULL, NULL);
-	glfwMakeContextCurrent(this->window);
-	glfwSwapInterval(-1);
 	
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		MessageBeep(MB_ICONERROR);
-		MessageBox(NULL, L"Failed to initialize OpenGL.", L"M3D GameEngine", MB_ICONERROR);
-		glfwDestroyWindow(this->window);
-		glfwTerminate();
+	if (!gGalliumFlag) {
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		this->gWindow = glfwCreateWindow(this->gFramebufferWidth, this->gFramebufferHeight, windowTitle.c_str(), NULL, NULL);
+
+		glfwMakeContextCurrent(this->gWindow);
+		glfwSwapInterval(-1);
+
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+			MessageBeep(MB_ICONERROR);
+			MessageBox(NULL, L"Failed to initialize OpenGL.", L"M3D GameEngine", MB_ICONERROR);
+			glfwDestroyWindow(this->gWindow);
+			glfwTerminate();
+		}
+	}
+	else {
+		if (InitializeMesa3D()) {
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			this->gWindow = glfwCreateWindow(this->gFramebufferWidth, this->gFramebufferHeight, windowTitle.c_str(), NULL, NULL);
+
+			HWND hWnd = glfwGetWin32Window(this->gWindow);
+			HDC dc = GetDC(hWnd);
+			PIXELFORMATDESCRIPTOR pfd =
+			{
+				sizeof(PIXELFORMATDESCRIPTOR),
+				1,
+				PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL,
+				PFD_TYPE_RGBA,
+				24,
+				0,0,0,0,0,0,
+				0,
+				0,
+				0,0,0,0,
+				8,
+				0,
+				0,
+				PFD_MAIN_PLANE,
+				0,
+				0,0,0
+			};
+			int pf;
+			pf = ChoosePixelFormat(dc, &pfd);
+			if (!pf) {
+				MessageBox(NULL, L"Failed to get a proper pixel format.", L"M3D GameEngine", MB_ICONERROR);
+			}
+			else {
+				SetPixelFormat(dc, pf, &pfd);
+				HGLRC rc = mwglCreateContext(dc);
+				assert(rc);
+				mwglMakeCurrent(dc, rc);
+				m_DC = mwglGetCurrentDC();
+				
+				if (!gladLoadGLLoader((GLADloadproc)mwglGetProcAddress)) {
+					MessageBeep(MB_ICONERROR);
+					MessageBox(NULL, L"Failed to initialize Gallium.", L"M3D GameEngine", MB_ICONERROR);
+					glfwDestroyWindow(this->gWindow);
+					glfwTerminate();
+				}
+			}
+		}
 	}
 
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-	glfwSetWindowUserPointer(this->window, reinterpret_cast<void*>(this));
-	glfwSetCharCallback(this->window, OfflineGame_CharCallback);
-	glfwSetKeyCallback(this->window, OfflineGame_KeyCallback);
-	glfwSetFramebufferSizeCallback(this->window, OfflineGame_FramebufferSizeCallback);
-	glfwSetCursorPosCallback(this->window, OfflineGame_CursorPosCallback);
-	glfwSetScrollCallback(this->window, OfflineGame_ScrollCallback);
+	//glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+	glfwSetWindowUserPointer(this->gWindow, reinterpret_cast<void*>(this));
+	glfwSetCharCallback(this->gWindow, OfflineGame_CharCallback);
+	glfwSetKeyCallback(this->gWindow, OfflineGame_KeyCallback);
+	glfwSetFramebufferSizeCallback(this->gWindow, OfflineGame_FramebufferSizeCallback);
+	glfwSetCursorPosCallback(this->gWindow, OfflineGame_CursorPosCallback);
+	glfwSetScrollCallback(this->gWindow, OfflineGame_ScrollCallback);
 	//glfwSetWindowSizeLimits(this->window, this->windowWidth, this->windowHeight, this->windowWidth, this->windowHeight);
 
 	this->SplashScreen();
@@ -109,13 +216,14 @@ MOfflineGame::MOfflineGame(unsigned int OS) {
 	ImFont* font = io.Fonts->AddFontFromFileTTF(GetFullAssetPathA("Fonts\\arial.ttf"), 18.0f);
 	io.FontDefault = font;
 
-	ImGui_ImplGlfw_InitForOpenGL(this->window, true);
+	ImGui_ImplGlfw_InitForOpenGL(this->gWindow, true);
 	ImGui_ImplOpenGL3_Init("#version 430 core");
 
 	this->gAssetManager = new MAssetManager(this);
 	this->gGameConsole = new MGameConsole(this);
 	this->gGameContext = new MGameContext(this);
 	this->InitializePipeline();
+	this->InitializeMImGui();
 
 	this->InitializePhysX();
 	this->MakeLuaBindings();
@@ -135,7 +243,7 @@ MOfflineGame::~MOfflineGame() {
 	this->gGameConsole = nullptr;
 	this->gameConfigDoc = nullptr;
 
-	glfwDestroyWindow(this->window);
+	glfwDestroyWindow(this->gWindow);
 	glfwTerminate();
 }
 
@@ -144,13 +252,13 @@ int MOfflineGame::GetKey(int key) {
 		return -1;
 	}
 	else {
-		return glfwGetKey(this->window, key);
+		return glfwGetKey(this->gWindow, key);
 	}
 }
 
 int MOfflineGame::GetKeyInGameConsole(int key) {
 	if (gGameConsole->GetConsoleVisibility()) {
-		return glfwGetKey(this->window, key);
+		return glfwGetKey(this->gWindow, key);
 	}
 	else {
 		return -1;
@@ -164,13 +272,13 @@ void MOfflineGame::Update() {
 
 	if (this->gFullscreenFlag) {
 		const GLFWvidmode* vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-		glfwSetWindowSize(this->window, vidmode->width, vidmode->height);
-		glfwSetWindowMonitor(this->window, glfwGetPrimaryMonitor(), 0, 0, vidmode->width, vidmode->height, GLFW_DONT_CARE);
+		glfwSetWindowSize(this->gWindow, vidmode->width, vidmode->height);
+		glfwSetWindowMonitor(this->gWindow, glfwGetPrimaryMonitor(), 0, 0, vidmode->width, vidmode->height, GLFW_DONT_CARE);
 	}
-	this->gShouldExit = glfwWindowShouldClose(this->window);
+	this->gShouldExit = glfwWindowShouldClose(this->gWindow);
 
 	if (!gGameConsole->GetConsoleVisibility()) {
-		glfwGetCursorPos(this->window, &this->mCursorPosX, &this->mCursorPosY);
+		glfwGetCursorPos(this->gWindow, &this->mCursorPosX, &this->mCursorPosY);
 	}
 
 	glViewport(0, 0, gFramebufferWidth, gFramebufferHeight);
@@ -181,14 +289,11 @@ void MOfflineGame::Update() {
 		gCurrentContainer->Update(this->deltaTime);
 		gCurrentContainer->Render();
 	}
-	glBindFramebuffer(GL_FRAMEBUFFER, gDefaultFBO);
-	glDisable(GL_CULL_FACE);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glDisable(GL_DEPTH_TEST);
 	gDeferredPipeline->DoLightingPass();
-	gDeferredPipeline->RenderNDCQuad();
+	gDeferredPipeline->DoIndirectLightingPass();
+	gDeferredPipeline->DoCompositionPass();
+
 	//Post Render
 	if (gCurrentContainer && gMode == MPlatformMode::SCENE) {
 		reinterpret_cast<MScene*>(gCurrentContainer)->OnPostRender();
@@ -199,6 +304,7 @@ void MOfflineGame::Update() {
 	//ImGui
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	this->gGuiContext->RenderText("arial", std::string("FPS ") + std::to_string(int(this->FPS)), 10.0f, this->gFramebufferHeight - 25.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.5);
 
 	(*gLuaState)["Main_OnTickFinish"]();
 
@@ -208,7 +314,13 @@ void MOfflineGame::Update() {
 	this->mScrollOffsetX = 0.0;
 	this->mScrollOffsetY = 0.0;
 
-	glfwSwapBuffers(this->window);
+	if (!gGalliumFlag) {
+		glfwSwapBuffers(this->gWindow);
+	}
+	else {
+		mwglSwapBuffers(m_DC);
+	}
+
 	glfwPollEvents();
 }
 
@@ -217,7 +329,7 @@ void MOfflineGame::ConsoleWriteLine(float r, float g, float b, const std::string
 }
 
 bool MOfflineGame::GetMouseLeftButtonDown() {
-	int n = glfwGetMouseButton(this->window, GLFW_MOUSE_BUTTON_LEFT);
+	int n = glfwGetMouseButton(this->gWindow, GLFW_MOUSE_BUTTON_LEFT);
 	switch (n)
 	{
 	case GLFW_PRESS:
@@ -233,7 +345,7 @@ bool MOfflineGame::GetMouseLeftButtonDown() {
 }
 
 bool MOfflineGame::GetMouseRightButtonDown() {
-	int n = glfwGetMouseButton(this->window, GLFW_MOUSE_BUTTON_RIGHT);
+	int n = glfwGetMouseButton(this->gWindow, GLFW_MOUSE_BUTTON_RIGHT);
 	switch (n)
 	{
 	case GLFW_PRESS:
@@ -249,7 +361,7 @@ bool MOfflineGame::GetMouseRightButtonDown() {
 }
 
 bool MOfflineGame::GetMouseLeftButtonUp() {
-	int n = glfwGetMouseButton(this->window, GLFW_MOUSE_BUTTON_LEFT);
+	int n = glfwGetMouseButton(this->gWindow, GLFW_MOUSE_BUTTON_LEFT);
 	switch (n)
 	{
 	case GLFW_PRESS:
@@ -265,7 +377,7 @@ bool MOfflineGame::GetMouseLeftButtonUp() {
 }
 
 bool MOfflineGame::GetMouseRightButtonUp() {
-	int n = glfwGetMouseButton(this->window, GLFW_MOUSE_BUTTON_RIGHT);
+	int n = glfwGetMouseButton(this->gWindow, GLFW_MOUSE_BUTTON_RIGHT);
 	switch (n)
 	{
 	case GLFW_PRESS:
@@ -308,6 +420,7 @@ void MOfflineGame::FramebufferSizeCallback(int width, int height) {
 	default:
 		break;
 	}
+	gForwardPipeline->UpdateFramebufferSize();
 	gDeferredPipeline->UpdateFramebufferSize();
 	gAtomspherePipeline->UpdateFramebufferSize();
 }
@@ -325,12 +438,12 @@ void MOfflineGame::ScrollCallback(double xoffset, double yoffset) {
 
 void MOfflineGame::SetCursorInvisible() {
 	mCursorDisabled = true;
-	glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(this->gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void MOfflineGame::SetCursorVisible() {
 	mCursorDisabled = false;
-	glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	glfwSetInputMode(this->gWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 
@@ -470,6 +583,15 @@ void MBasicPlatform::InitializePipeline() {
 	gDeferredPipeline = new MRenderDeferredPipeline(this);
 	gAtomspherePipeline = new MRenderAtomspherePipeline(this);
 	gDepthMappingPipeline = new MRenderDepthMappingPipeline(this);
+	gForwardPipeline = new MRenderForwardPipeline(this);
+	gGuiPipeline = new MRenderGuiPipeline(this);
+}
+
+void MBasicPlatform::InitializeMImGui() {
+	if (FT_Init_FreeType(&mFreetypeLib)) {
+		MessageBox(NULL, L"Failed to initialize Freetype.", L"ERROR", MB_ICONHAND);
+	}
+	gGuiContext = new MGuiContext(this, mFreetypeLib, gGuiPipeline);
 }
 
 void MBasicPlatform::LoadGlobalConfig() {
@@ -524,10 +646,21 @@ void MBasicPlatform::LoadUIForm(const std::string& path) {
 	this->gMode = MPlatformMode::FORM;
 }
 
+void MBasicPlatform::UpdateDepthMappingPipeline() {
+	gDepthMappingPipeline->UpdateDepthMappingSize();
+}
+
+void MBasicPlatform::UpdateFullscreenState() {
+
+}
+
 void MBasicPlatform::MakeLuaBindings() {
 	gLuaState->new_usertype<glm::vec2>("vec2",
 		"x", &glm::vec2::x,
 		"y", &glm::vec2::y);
+	gLuaState->new_usertype<glm::ivec2>("ivec2",
+		"x", &glm::ivec2::x,
+		"y", &glm::ivec2::y);
 	gLuaState->new_usertype<glm::vec3>("vec3",
 		"x", &glm::vec3::x,
 		"y", &glm::vec3::y,
@@ -570,6 +703,10 @@ void MBasicPlatform::MakeLuaBindings() {
 		"SetPosition", &MRigidBodyPhysicsProxySphere::SetPosition,
 		"Validate", &MRigidBodyPhysicsProxySphere::Validate,
 		"Invalidate", &MRigidBodyPhysicsProxySphere::Invalidate);
+	gLuaState->new_usertype<MButtonEvent>("ButtonEvent",
+		"click", &MButtonEvent::click,
+		"dbclick", &MButtonEvent::dbclick,
+		"mouseOn", &MButtonEvent::mouseOn);
 	gLuaState->set_function("GetTime", Game_GetTime);
 	gLuaState->set_function("GetCameraPosition", CinematicCamera_GetPosition);
 	gLuaState->set_function("GetCameraFront", CinematicCamera_GetFront);
@@ -600,6 +737,7 @@ void MBasicPlatform::MakeLuaBindings() {
 	gLuaState->set_function("GetCursorPosY", Game_GetCursorPosY);
 	gLuaState->set_function("GetScrollOffsetX", Game_GetScrollOffsetX);
 	gLuaState->set_function("GetScrollOffsetY", Game_GetScrollOffsetY);
+	gLuaState->set_function("GetWindowSize", Game_GetWindowSize);
 	gLuaState->set_function("BindEntityComponent", Entity_BindEntityComponent);
 	gLuaState->set_function("Invalidate", RigidDynamic_Invalidate);
 	gLuaState->set_function("Validate", RigidDynamic_Validate);
@@ -612,12 +750,26 @@ void MBasicPlatform::MakeLuaBindings() {
 	gLuaState->set_function("SetDynamicTimeOfDay", Game_SetDynamicTimeOfDay);
 	gLuaState->set_function("CastRayByCursorPosition", Game_CastRayByCursorPosition);
 	gLuaState->set_function("GetRaycastingBlockPosition", Game_GetRaycastingBlockPosition);
+	gLuaState->set_function("CreateVec2", Game_CreateVec2);
 	gLuaState->set_function("CreateVec3", Game_CreateVec3);
 	gLuaState->set_function("CreateVec4", Game_CreateVec4);
+	gLuaState->set_function("SetGlobalVariableInt", Game_SetGlobalVariableInt);
+	gLuaState->set_function("SetGlobalVariableFloat", Game_SetGlobalVariableFloat);
+	gLuaState->set_function("SetGlobalVariableDouble", Game_SetGlobalVariableDouble);
+	gLuaState->set_function("SetGlobalVariableString", Game_SetGlobalVariableString);
+	gLuaState->set_function("GetGlobalVariableInt", Game_GetGlobalVariableInt);
+	gLuaState->set_function("GetGlobalVariableFloat", Game_GetGlobalVariableFloat);
+	gLuaState->set_function("GetGlobalVariableDouble", Game_GetGlobalVariableDouble);
+	gLuaState->set_function("GetGlobalVariableString", Game_GetGlobalVariableString);
+	gLuaState->set_function("GuiAddFace", Gui_AddFace);
+	gLuaState->set_function("GuiRenderText", Gui_RenderText);
+	gLuaState->set_function("GuiRenderButton", Gui_RenderButton);
+	gLuaState->set_function("Exit", exit);
 	this->gLuaState->open_libraries(sol::lib::base, sol::lib::table, sol::lib::math);
 }
 
 MEditor::MEditor(unsigned int OS) {
+	gType = MPlatformType::EDITOR;
 	this->gLuaState = new sol::state();
 	this->gLuaState->open_libraries(sol::lib::base);
 
@@ -630,6 +782,7 @@ MEditor::MEditor(unsigned int OS) {
 	gFramebufferHeight = GetPrivateProfileInt(L"Graphics", L"WindowHeight", 0, GetFullAssetPathW(L"system.ini"));
 	gFramebufferWidth = GetPrivateProfileInt(L"Graphics", L"WindowWidth", 0, GetFullAssetPathW(L"system.ini"));
 	gAtmosphereQuality = GetPrivateProfileInt(L"Graphics", L"AtmosphereQuality", 0, GetFullAssetPathW(L"system.ini"));
+	gSSDOFlag = GetPrivateProfileInt(L"Graphics", L"SSDO", 0, GetFullAssetPathW(L"system.ini"));
 
 	std::string mainModulePath = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("main_script");
 	std::string windowTitle = gameConfigDoc->RootElement()->FirstChildElement()->Attribute("title");
@@ -672,6 +825,7 @@ MEditor::MEditor(unsigned int OS) {
 	this->gGameConsole = new MGameConsole(this);
 	this->gGameContext = new MGameContext(this);
 	this->InitializePipeline();
+	this->InitializeMImGui();
 
 	this->InitializePhysX();
 	this->MakeLuaBindings();
@@ -784,19 +938,32 @@ void MEditor::Update() {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
+
 	gDeferredPipeline->DoLightingPass();
-	gDeferredPipeline->RenderNDCQuad();
+	gDeferredPipeline->DoIndirectLightingPass();
+	gDeferredPipeline->DoCompositionPass();
+
+	if (!gCurrentContainer) {
+		this->gGuiContext->RenderText("arial", std::string("FPS ") + std::to_string(int(this->FPS)), 10.0f, this->gFramebufferHeight - 25.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.5);
+	}
 	//Post Render
 	if (gCurrentContainer && gMode == MPlatformMode::SCENE) {
 		static MScene* scene = reinterpret_cast<MScene*>(gCurrentContainer);
 		if (scene->IsEditorMode()) {
-			scene->mEditorAgent->Tick();
+			if (scene->mEditorAgent) {
+				scene->mEditorAgent->Tick();
+			}
+			this->gGuiContext->RenderText("arial", std::string("FPS ") + std::to_string(int(this->FPS)), 10.0f, this->gFramebufferHeight - 25.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.5);
 		}
 		else {
 			scene->OnPostRender();
+			this->gGuiContext->RenderText("arial", std::string("FPS ") + std::to_string(int(this->FPS)), 10.0f, this->gFramebufferHeight - 25.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.5);
 			(*gLuaState)["Main_OnTickFinish"]();
 		}
 	}
+
+	this->FPS = 1.0 / abs(this->deltaTime);
+
 	//reset scroll offset values
 	this->mScrollOffsetX = 0.0;
 	this->mScrollOffsetY = 0.0;
@@ -908,6 +1075,7 @@ void MEditor::FramebufferSizeCallback(int width, int height) {
 	default:
 		break;
 	}
+	gForwardPipeline->UpdateFramebufferSize();
 	gDeferredPipeline->UpdateFramebufferSize();
 	gAtomspherePipeline->UpdateFramebufferSize();
 }

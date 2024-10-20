@@ -19,8 +19,6 @@ public:
 	virtual void Save()override{}
 	virtual void InitializeLuaInstance()override;
 	virtual void Update(double dt)override;
-	virtual void Render()override;
-	virtual void RenderForDepthMapping()override { }
 	void UpdateParameters();
 protected:
 	MTimeOfDay* mTimeOfDay = NULL;

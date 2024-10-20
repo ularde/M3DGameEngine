@@ -1,0 +1,3 @@
+<Scene name="MainMenu" script="Scripts\Gameplay\mainmenu.lua" dummy_flag="1">
+    <TimeOfDay dynamic="1" speed="100" xoffset="0.2" iSun="22" rPlanet="6371000" rAtmos="6471000" kRlh="0.000006,0.000013,0.000022" kMie="2.1e-05" shRlh="8000" shMie="1200" g="0.75800002"/>
+</Scene>

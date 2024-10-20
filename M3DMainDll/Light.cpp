@@ -19,7 +19,7 @@ MPointLight::MPointLight(MScene* scene_, const std::string& name_, const std::st
 	float linear_, float quadratic_, bool cast_shadow) {
 	this->gPlatform = scene_->GetPlatform();
 	this->mParent = scene_;
-	this->name = name_;
+	this->mName = name_;
 	this->linear = linear_;
 	this->quadratic = quadratic_;
 	this->mPosition = position;
@@ -51,16 +51,12 @@ void MPointLight::InitializeLuaInstance()
 void MPointLight::Update(double delta_time) {
 }
 
-void MPointLight::Render() {
-
-}
-
 MDirectionalLight::MDirectionalLight(MScene* scene_, const std::string& name_,
 	const std::string& pymodule_path, const glm::vec3& direction,
 	const glm::vec3& color, bool cast_shadow) {
 	this->gPlatform = scene_->GetPlatform();
 	this->mParent = scene_;
-	this->name = name_;
+	this->mName = name_;
 	this->mDirection = direction;
 	this->mColor = color;
 	this->mCastShadow = cast_shadow;
@@ -77,10 +73,8 @@ void MDirectionalLight::InitializeLuaInstance()
 void MDirectionalLight::Update(double dt) {
 	mColor = mTimeOfDay->GetSunColor();
 	mDirection = mTimeOfDay->GetSunDirection();
-}
-
-void MDirectionalLight::Render() {
 	gPlatform->gDeferredPipeline->SetDirectionalLight(mDirection, mColor);
+	gPlatform->gForwardPipeline->SetDirectionalLight(mDirection, mColor);
 	//gPlatform->gForwardPipeline->SetDirectionalLight(mDirection, mColor);
 	glm::mat4 projection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, -2.0f, 100.0f);
 	glm::mat4 view(1.0f);
@@ -96,8 +90,6 @@ void MDirectionalLight::Render() {
 	}
 	glm::mat4 lightSpaceMatrix = projection * view;
 	gPlatform->gDeferredPipeline->SetLightSpaceMatrix(lightSpaceMatrix);
+	gPlatform->gForwardPipeline->SetLightSpaceMatrix(lightSpaceMatrix);
 	gPlatform->gDepthMappingPipeline->SetLightSpaceMatrix(lightSpaceMatrix);
-	if (this->mCastShadow) {
-		mParent->RenderForDepthMapping();
-	}
 }

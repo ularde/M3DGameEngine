@@ -175,7 +175,9 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameConsole.h" />
     <ClInclude Include="GameContext.h" />
+    <ClInclude Include="GeometricShape.h" />
     <ClInclude Include="glad.h" />
+    <ClInclude Include="GuiContext.h" />
     <ClInclude Include="imconfig.h" />
     <ClInclude Include="imgui.h" />
     <ClInclude Include="imgui_impl_glfw.h" />
@@ -188,21 +190,19 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MatrixManager.h" />
+    <ClInclude Include="GeometryInstance.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="UIControl.h" />
-    <ClInclude Include="UIFormEditorAgent.h" />
-    <ClInclude Include="UIInputBox.h" />
-    <ClInclude Include="UIPopup.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PhysXInterface.h" />
     <ClInclude Include="PlatformInterface.h" />
     <ClInclude Include="Platforms.h" />
     <ClInclude Include="Global.h" />
-    <ClInclude Include="Player.h" />
     <ClInclude Include="RenderDeferredPipeline.h" />
     <ClInclude Include="RenderDepthMappingPipeline.h" />
     <ClInclude Include="RenderEnvironmentPipeline.h" />
     <ClInclude Include="RenderAtomspherePipeline.h" />
+    <ClInclude Include="RenderForwardSubPipeline.h" />
+    <ClInclude Include="RenderGuiPipeline.h" />
     <ClInclude Include="RenderObject.h" />
     <ClInclude Include="RenderOcclusionQueryPipeline.h" />
     <ClInclude Include="RenderPipeline.h" />
@@ -211,17 +211,10 @@
     <ClInclude Include="SharedFunc.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="RigidStatic.h" />
-    <ClInclude Include="Skybox.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TimeOfDay.h" />
     <ClInclude Include="tinyxml2.h" />
-    <ClInclude Include="UIButton.h" />
-    <ClInclude Include="UIForm.h" />
     <ClInclude Include="ShaderManager.h" />
-    <ClInclude Include="UILabel.h" />
-    <ClInclude Include="UIListBox.h" />
-    <ClInclude Include="UITabBox.h" />
-    <ClInclude Include="UITable.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActorEditorAgent.cpp" />
@@ -236,6 +229,7 @@
     <ClCompile Include="GameConsole.cpp" />
     <ClCompile Include="GameContext.cpp" />
     <ClCompile Include="glad.cpp" />
+    <ClCompile Include="GuiContext.cpp" />
     <ClCompile Include="imgui.cpp" />
     <ClCompile Include="imgui_demo.cpp" />
     <ClCompile Include="imgui_draw.cpp" />
@@ -256,20 +250,19 @@
     </ClCompile>
     <ClCompile Include="PlatformInterface.cpp" />
     <ClCompile Include="Platforms.cpp" />
-    <ClCompile Include="Player.cpp" />
     <ClCompile Include="RenderDeferredPipeline.cpp" />
     <ClCompile Include="RenderDepthMappingPipeline.cpp" />
     <ClCompile Include="RenderAtomspherePipeline.cpp" />
+    <ClCompile Include="RenderForwardSubPipeline.cpp" />
+    <ClCompile Include="RenderGuiPipeline.cpp" />
     <ClCompile Include="RenderPipeline.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneEditorAgent.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="RigidStatic.cpp" />
-    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TimeOfDay.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
-    <ClCompile Include="UIForm.cpp" />
     <ClCompile Include="SharedFunc.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

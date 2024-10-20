@@ -12,10 +12,13 @@
 #include "Class.h"
 #include "Global.h"
 #include "Texture.h"
+#include "GeometricShape.h"
 
 class MUnscriptableObject;
 class MBasicPlatform;
 class MTexture;
+class MRigidStatic;
+class MGeometricShape;
 
 struct MMeshVertex {
     glm::vec3 position;
@@ -27,12 +30,15 @@ struct MMeshVertex {
     //float m_Weights[M3D_MAX_BONE_COUNT];
 };
 
-class MMesh: public MUnscriptableObject {
+class MTriangleMesh: public MGeometricShape {
 public:
-    MMesh(MBasicPlatform* platform_, std::vector<MMeshVertex> vertices_,
-        std::vector<unsigned int> indices_, unsigned int material_index,
-        int surface_type_ID);
-    ~MMesh();
+    MTriangleMesh(MBasicPlatform* platform, std::vector<MMeshVertex> vertices,
+        std::vector<unsigned int> indices, unsigned int materialIndex,
+        int surfaceTypeID);
+    MTriangleMesh(MBasicPlatform* platform, std::vector<MMeshVertex> vertices,
+        std::vector<unsigned int> indices, unsigned int materialIndex,
+        int surfaceTypeID, bool enablePhysics);
+    ~MTriangleMesh();
     void Render();
     void RenderForDepthMapping();
     bool GetPhysicsStatue() { return this->mTriangleMeshCooked; }
@@ -40,9 +46,8 @@ public:
     std::vector<glm::vec3> GetVertexPositions();
     physx::PxTriangleMesh* GetTriangleMesh() { return this->pTriangleMesh; }
 private:
-    MBasicPlatform* platform = NULL;
-    std::vector<MMeshVertex> vertices; 
-    std::vector<unsigned int> indices; 
+    std::vector<MMeshVertex> mVertices; 
+    std::vector<unsigned int> mIndices; 
     GLuint VAO, VBO, EBO;
     unsigned int mMaterialIndex = 0;
     int mSurfaceTypeID = 0;

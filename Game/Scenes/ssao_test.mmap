@@ -1,0 +1,10 @@
+<Scene name="SSAOTest" script="Scripts\Gameplay\ssao_test.lua" dummy_flag="0">
+    <TimeOfDay dynamic="0" speed="100" xoffset="0.52399999" iSun="22" rPlanet="6371000" rAtmos="6471000" kRlh="0.000006,0.000013,0.000022" kMie="2.1e-05" shRlh="8000" shMie="1200" g="0.75800002"/>
+    <Actor class="Entity" name="LocalPlayer" def="Scripts\Actors\Entities\Player.ment" position="6.0000000,10.0000000,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="Ground" model="Objects\floor2\floor2.obj" material="" position="0.000000,-0.8279198,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic2" model="Objects\props\step.obj" material="" position="0.0105376,-0.8279196,3.7303009" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic3" model="Objects\pyramid\pyramid.obj" material="" position="-4.3413097,-0.8279202,-3.3710083" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic4" model="Objects\props\torus.obj" material="" position="2.5225365,-0.8279201,-3.3710083" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic5" model="Objects\demo\sphere\sphere.obj" material="Materials\stone_wall_vkmeddz.mmtl" position="4.6000000,-0.4000000,0.7000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic6" model="Objects\demo\sphere\sphere.obj" material="Materials\wood_plank_vjisagn.mmtl" position="6.6000000,-0.4000000,0.7000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+</Scene>

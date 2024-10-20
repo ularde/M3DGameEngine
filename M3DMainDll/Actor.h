@@ -10,12 +10,12 @@ class MActorEditorAgent;
 
 class MActor :public MScriptableObject {
 public:
-	std::string name;
+	std::string mName;
 	MScene* mParent = NULL;
 	MActorEditorAgent* mEditorAgent = NULL;
 	virtual void Save() = 0;
 	virtual void Update(double dt) = 0;
-	virtual void Render() = 0;
-	virtual void RenderForDepthMapping() = 0;
+	//virtual void Render() = 0;
+	//virtual void RenderForDepthMapping() = 0;
 protected:
 };

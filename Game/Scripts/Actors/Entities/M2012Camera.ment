@@ -1,0 +1,3 @@
+<EntityDefinition name="M2012Camera" script="Scripts\Actors\Entities\M2012Camera.lua">
+<EntityComponent class="CinematicCamera" name="CinematicCamera0" front="0.0,0.0,-1.0"/>
+</EntityDefinition>

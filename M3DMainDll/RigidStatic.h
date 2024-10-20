@@ -14,11 +14,11 @@ class MMaterial;
 class MRigidStatic :public MActor {
 public:
 	MRigidStatic(MScene* scene_, const std::string& name_, const std::string& model_path, const std::string& material_path,
-		const glm::vec3& position_, const glm::vec3& scale_, const glm::vec3& rotate_);
+		const glm::vec3& position_, const glm::vec3& scale_, const glm::vec4& rotate_);
 	~MRigidStatic();
-	glm::vec3 position;
-	glm::vec3 rotate;
-	glm::vec3 scale;
+	glm::vec3 mPosition;
+	glm::vec4 mRotate;
+	glm::vec3 mScale;
 	glm::mat4 mModelMatrix = glm::mat4(1.0f);
 	physx::PxScene* pParentScene = NULL;
 	physx::PxRigidStatic* pActor = NULL;
@@ -31,6 +31,6 @@ public:
 	void UpdatePositionWhileCreating(const physx::PxVec3& pos);
 	virtual void InitializeLuaInstance()override;
 	virtual void Update(double dt)override;
-	virtual void Render()override;
-	virtual void RenderForDepthMapping()override;
+private:
+	bool mShouldRefreshTransparentMeshes = true;
 };

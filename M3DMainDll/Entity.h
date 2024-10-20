@@ -12,7 +12,7 @@ class MEntityComponent;
 class MEntity :public MActor {
 public:
 	MEntity(MScene* parent_, const std::string& name_, const std::string& def_file_path_, const std::string& script_path_,
-		const glm::vec3& position_, const glm::vec3& scale_, const glm::vec3& rotate_);
+		const glm::vec3& position_, const glm::vec3& scale_, const glm::vec4& rotate_);
 	~MEntity();
 	virtual void Save()override;
 	void LoadDefinition();
@@ -37,13 +37,12 @@ public:
 	glm::vec3 CinematicCamera_GetFront();
 	double CinematicCamera_GetFovy();
 	virtual void Update(double delta_time)override;
-	virtual void Render()override;
-	virtual void RenderForDepthMapping()override;
 	virtual void InitializeLuaInstance()override;
 	MEntityComponent* mCurrentComponent = NULL;
 	MEntityComponent* mThisComponent = NULL;
-	std::string mDefFilePath, scriptPath, secondaryClassName;
-	glm::vec3 position, scale, rotate;
+	std::string mDefFilePath;
+	glm::vec3 mPosition, mScale;
+	glm::vec4 mRotate;
 	tinyxml2::XMLDocument entityDefDoc;
 	std::vector<MEntityComponent*> components;
 	std::map<std::string, MEntityComponent*> componentMap;

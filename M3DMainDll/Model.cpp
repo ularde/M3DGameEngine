@@ -2,6 +2,8 @@
 #include "Model.h"
 #include "Material.h"
 #include "RenderDepthMappingPipeline.h"
+#include "RenderForwardSubPipeline.h"
+#include "RenderDeferredPipeline.h"
 
 MModel::MModel(bool immediately_load, MAssetManager* asset_manager, const std::string& guid, const std::string& model_type, const std::string& model_path) {
 	superType = M3D_ASSET_MODEL;
@@ -72,26 +74,33 @@ glm::vec3 MModel::GetOffsetXYZ() {
 	}
 }
 
-void MModel::Render() {
+void MModel::CommitGeometryInstances() {
 	if (mLoaded) {
 		for (unsigned int i = 0; i < mMeshes.size(); i++) {
-			if (mUseCustomMaterial) {
-				mMaterial->Assign(mMeshes[i].GetMaterialIndex());
+			if (mPresentOwner->IsRigidStatic()) {
+				gPlatform->gDepthMappingPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MRigidStatic*>(mPresentOwner), &mMeshes[i]));
+			}
+			else if (mPresentOwner->IsMeshComponent()) {
+				gPlatform->gDepthMappingPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MMeshComponent*>(mPresentOwner), &mMeshes[i]));
+			}
+
+			if (GetMaterial()->GetSubMaterial(mMeshes[i].GetMaterialIndex())->IsUseForwardPipeline()) {
+				if (mPresentOwner->IsRigidStatic()) {
+					gPlatform->gForwardPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MRigidStatic*>(mPresentOwner), &mMeshes[i]));
+				}
+				else if (mPresentOwner->IsMeshComponent()) {
+					gPlatform->gForwardPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MMeshComponent*>(mPresentOwner), &mMeshes[i]));
+				}
 			}
 			else {
-				mInitialMaterial->Assign(mMeshes[i].GetMaterialIndex());
-			}
-			mMeshes[i].Render();
-			if (mUseCustomMaterial) {
-				mMaterial->Unassign(mMeshes[i].GetMaterialIndex());
-			}
-			else {
-				mInitialMaterial->Unassign(mMeshes[i].GetMaterialIndex());
+				if (mPresentOwner->IsRigidStatic()) {
+					gPlatform->gDeferredPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MRigidStatic*>(mPresentOwner), &mMeshes[i]));
+				}
+				else if (mPresentOwner->IsMeshComponent()) {
+					gPlatform->gDeferredPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MMeshComponent*>(mPresentOwner), &mMeshes[i]));
+				}
 			}
 		}
-		//if (mMaterial != mInitialMaterial) {
-		//	mMaterial = mInitialMaterial;
-		//}
 	}
 	else {
 		LoadModel();
@@ -119,7 +128,33 @@ void MModel::ProcessNode(aiNode* node) {
 	}
 }
 
-MMesh MModel::GenerateMMesh(aiMesh* mesh) {
+MMaterial* MModel::GetMaterial() {
+	if (mUseCustomMaterial) {
+		return mMaterial;
+	}
+	return mInitialMaterial;
+}
+
+MTriangleMesh* MModel::FirstTransparentMesh() {
+	for (auto i = 0u; i < mMeshes.size(); i++) {
+		if (GetMaterial()->GetSubMaterial(mMeshes[i].GetMaterialIndex())->IsUseForwardPipeline()) {
+			return &(mMeshes[i]);
+		}
+	}
+	return 0;
+}
+
+MTriangleMesh* MModel::NextTransparentMesh() {
+	for (auto i = mCurrentTransparentMeshID; i < mMeshes.size(); i++) {
+		if (GetMaterial()->GetSubMaterial(mMeshes[i].GetMaterialIndex())->IsUseForwardPipeline()) {
+			mCurrentTransparentMeshID = i;
+			return &(mMeshes[i]);
+		}
+	}
+	return 0;
+}
+
+MTriangleMesh MModel::GenerateMMesh(aiMesh* mesh) {
 	std::vector<MMeshVertex> vertices;
 	std::vector<unsigned int> indices;
 	//position, normal, tex coords, tangent, bitangent of vertices
@@ -170,7 +205,7 @@ MMesh MModel::GenerateMMesh(aiMesh* mesh) {
 	MSubMaterial* s_mat = mMaterial->GetSubMaterial(mesh->mMaterialIndex);
 	int surface_type_ID = s_mat->GetSurfaceTypeID();
 
-	return MMesh(gAssetManager->GetPlatform(), vertices, indices, mesh->mMaterialIndex, surface_type_ID);
+	return MTriangleMesh(gAssetManager->GetPlatform(), vertices, indices, mesh->mMaterialIndex, surface_type_ID);
 }
 
 void MModel::LoadModel() {

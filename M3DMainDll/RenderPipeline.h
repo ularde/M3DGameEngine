@@ -28,8 +28,7 @@ public:
 	virtual void DisableColorMask() = 0;
 	virtual void EnableColorMask() = 0;
 	virtual void SendMatricesToShader() = 0;
-	virtual void BeginRendering() = 0;
-	virtual void EndRendering() = 0;
+	virtual void RenderQueueGeometryInstances() = 0;
 protected:
 	glm::vec3 gCamPos;
 	MBasicPlatform* gPlatform = NULL;

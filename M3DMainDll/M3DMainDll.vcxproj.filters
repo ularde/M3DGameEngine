@@ -19,13 +19,20 @@
     <Filter Include="源文件\RenderPipeline">
       <UniqueIdentifier>{14d6968f-b727-4c1b-9f92-c860db45eea8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\UI">
-      <UniqueIdentifier>{93aea341-6231-434b-ad87-194dbc227ac1}</UniqueIdentifier>
-      <Extensions>
-      </Extensions>
+    <Filter Include="头文件\ImGui">
+      <UniqueIdentifier>{a24966e4-4c4b-4888-a3a2-0fc2ff33816a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\UI">
+    <Filter Include="源文件\ImGui">
       <UniqueIdentifier>{2091b1e4-1b39-4aff-8055-dbf8769d14be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\MImGui">
+      <UniqueIdentifier>{d54806a5-bd2c-44b4-a0f2-8a40d8b65490}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\MImGui">
+      <UniqueIdentifier>{c4ae00a2-7e4c-4005-a753-769562d241d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Geometry">
+      <UniqueIdentifier>{fff2ebdf-c1c7-4b47-8dcf-cb86c042883e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -77,9 +84,6 @@
     <ClInclude Include="SharedFunc.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -105,9 +109,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Entity.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Skybox.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="RenderPipeline.h">
@@ -137,37 +138,10 @@
     <ClInclude Include="Material.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Atmosphere.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="imconfig.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_internal.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imstb_rectpack.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imstb_textedit.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imstb_truetype.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_impl_opengl3.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_impl_glfw.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_impl_opengl3_loader.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="GameContext.h">
@@ -182,35 +156,47 @@
     <ClInclude Include="SceneEditorAgent.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="UIInputBox.h">
-      <Filter>头文件\UI</Filter>
+    <ClInclude Include="imgui.h">
+      <Filter>头文件\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="UIPopup.h">
-      <Filter>头文件\UI</Filter>
+    <ClInclude Include="imgui_impl_glfw.h">
+      <Filter>头文件\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="UITable.h">
-      <Filter>头文件\UI</Filter>
+    <ClInclude Include="imgui_impl_opengl3.h">
+      <Filter>头文件\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="UITabBox.h">
-      <Filter>头文件\UI</Filter>
+    <ClInclude Include="imgui_internal.h">
+      <Filter>头文件\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="UIListBox.h">
-      <Filter>头文件\UI</Filter>
+    <ClInclude Include="imgui_impl_opengl3_loader.h">
+      <Filter>头文件\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="UILabel.h">
-      <Filter>头文件\UI</Filter>
+    <ClInclude Include="imstb_rectpack.h">
+      <Filter>头文件\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="UIForm.h">
-      <Filter>头文件\UI</Filter>
+    <ClInclude Include="imstb_textedit.h">
+      <Filter>头文件\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="UIButton.h">
-      <Filter>头文件\UI</Filter>
+    <ClInclude Include="imstb_truetype.h">
+      <Filter>头文件\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="UIControl.h">
-      <Filter>头文件\UI</Filter>
+    <ClInclude Include="RenderGuiPipeline.h">
+      <Filter>头文件\RenderPipeline</Filter>
     </ClInclude>
-    <ClInclude Include="UIFormEditorAgent.h">
-      <Filter>头文件\UI</Filter>
+    <ClInclude Include="GuiContext.h">
+      <Filter>头文件\MImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderForwardSubPipeline.h">
+      <Filter>头文件\RenderPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometryInstance.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometricShape.h">
+      <Filter>头文件\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>头文件\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -262,9 +248,6 @@
     <ClCompile Include="Model.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -278,9 +261,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="EntityComponent.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Skybox.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="RenderDeferredPipeline.cpp">
@@ -298,27 +278,6 @@
     <ClCompile Include="Atmosphere.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="imgui.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_demo.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_draw.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_tables.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_widgets.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_impl_glfw.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_impl_opengl3.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="RenderDepthMappingPipeline.cpp">
       <Filter>源文件\RenderPipeline</Filter>
     </ClCompile>
@@ -334,11 +293,38 @@
     <ClCompile Include="SceneEditorAgent.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="UIForm.cpp">
-      <Filter>源文件\UI</Filter>
-    </ClCompile>
     <ClCompile Include="Material.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui.cpp">
+      <Filter>源文件\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_demo.cpp">
+      <Filter>源文件\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>源文件\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_glfw.cpp">
+      <Filter>源文件\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_opengl3.cpp">
+      <Filter>源文件\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_tables.cpp">
+      <Filter>源文件\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_widgets.cpp">
+      <Filter>源文件\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderGuiPipeline.cpp">
+      <Filter>源文件\RenderPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiContext.cpp">
+      <Filter>源文件\MImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderForwardSubPipeline.cpp">
+      <Filter>源文件\RenderPipeline</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

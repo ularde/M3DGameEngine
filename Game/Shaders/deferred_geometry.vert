@@ -11,6 +11,7 @@ out mat3 vTBN;
 out vec2 vTexCoords;
 out vec4 vShadowCoord;
 
+uniform vec3 camPos;
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
@@ -25,7 +26,7 @@ void main()
 	vTBN = mat3(T, B, N);
     vec3 fragPos = vec3(view * model * vec4(aPosition, 1.0));
 	vShadowCoord = lightSpaceMatrix * model * vec4(aPosition, 1.0);
-    vPosition = fragPos;
+    vPosition.xyz = fragPos;
     vTexCoords = aTexCoords;
     gl_Position = projection * vec4(fragPos, 1.0);
 }

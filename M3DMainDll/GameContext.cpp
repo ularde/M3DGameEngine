@@ -6,7 +6,10 @@
 #include "Actor.h"
 #include "SharedFunc.h"
 #include "Camera.h"
+#include "GuiContext.h"
 #include <glm/glm.hpp>
+
+class MGuiContext;
 
 MGameContext* gGameContext = NULL;
 
@@ -23,8 +26,8 @@ void MGameContext::UpdateEntityTable() {
 	if (gPlatform->gMode == MPlatformMode::SCENE && gPlatform->gCurrentContainer != NULL) {
 		gCurrentScene = reinterpret_cast<MScene*>(gPlatform->gCurrentContainer);
 		for (unsigned int i = 0; i < gCurrentScene->mActorMap.size(); i++) {
-			if (gCurrentScene->mActors[i]->mClassName == "Entity") {
-				gEntityTable[gCurrentScene->mActors[i]->name] = reinterpret_cast<MEntity*>(gCurrentScene->mActors[i]);
+			if (gCurrentScene->mActors[i]->mPrototypeName == "Entity") {
+				gEntityTable[gCurrentScene->mActors[i]->mName] = reinterpret_cast<MEntity*>(gCurrentScene->mActors[i]);
 			}
 		}
 	}
@@ -191,7 +194,9 @@ void MGameContext::ConsoleWriteLine(const std::string& text) {
 }
 
 void MGameContext::LoadScene(const std::string& name) {
-	gPlatform->LoadScene(name);
+	if (gPlatform->IsGame()) {
+		gPlatform->LoadScene(name);
+	}
 }
 
 void MGameContext::SpawnEntity(const std::string& name, const std::string& def) {
@@ -422,6 +427,15 @@ int Game_GetMouseRButtonUp() {
 	}
 }
 
+glm::ivec2 Game_GetWindowSize() {
+	if (gGameContext) {
+		if (gGameContext->gPlatform) {
+			return glm::ivec2(gGameContext->gPlatform->gFramebufferWidth, gGameContext->gPlatform->gFramebufferHeight);
+		}
+	}
+	return glm::ivec2(0);
+}
+
 glm::vec3 Game_CastRayByCursorPosition(double x, double y) {
 	if (gGameContext) {
 		return gGameContext->CastRayByCursorPosition(x, y);
@@ -610,10 +624,88 @@ void Game_SetDynamicTimeOfDay(int flag) {
 	}
 }
 
+glm::vec2 Game_CreateVec2(float x, float y) {
+	return glm::vec2(x, y);
+}
+
 glm::vec3 Game_CreateVec3(float x, float y, float z) {
 	return glm::vec3(x, y, z);
 }
 
 glm::vec3 Game_CreateVec4(float x, float y, float z, float w) {
 	return glm::vec4(x, y, z, w);
+}
+
+void Game_SetGlobalVariableInt(const std::string& name, int v) {
+	if (name == "fullscreen") {
+		gGameContext->gPlatform->gFullscreenFlag = v;
+	}
+	else if (name == "atomsphere_quality") {
+		gGameContext->gPlatform->gAtmosphereQuality = v;
+		gGameContext->gPlatform->FramebufferSizeCallback(gGameContext->gPlatform->gFramebufferWidth, gGameContext->gPlatform->gFramebufferHeight);
+	}
+	else if (name == "shadow_quality") {
+		gGameContext->gPlatform->gShadowQuality = v;
+		gGameContext->gPlatform->UpdateDepthMappingPipeline();
+	}
+}
+
+void Game_SetGlobalVariableDouble(const std::string& name, double v) {
+
+}
+
+void Game_SetGlobalVariableFloat(const std::string& name, float v) {
+}
+
+void Game_SetGlobalVariableString(const std::string& name, const std::string& v) {
+}
+
+int Game_GetGlobalVariableInt(const std::string& name) {
+	if (name == "fullscreen") {
+		return gGameContext->gPlatform->gFullscreenFlag;
+	}
+	else if (name == "atomsphere_quality") {
+		return gGameContext->gPlatform->gAtmosphereQuality;
+	}
+	else if (name == "shadow_quality") {
+		return gGameContext->gPlatform->gShadowQuality;
+	}
+	return 0;
+}
+
+double Game_GetGlobalVariableDouble(const std::string& name) {
+	return 0.0;
+}
+
+float Game_GetGlobalVariableFloat(const std::string& name) {
+	return 0.0f;
+}
+
+std::string Game_GetGlobalVariableString(const std::string& name) {
+	return std::string();
+}
+
+void Gui_AddFace(const std::string& name, const std::string& path, unsigned int height) {
+	if (gGameContext) {
+		if (gGameContext->gPlatform) {
+			gGameContext->gPlatform->gGuiContext->AddFace(name, path, height);
+		}
+	}
+}
+
+MButtonEvent Gui_RenderButton(const std::string& face, const std::string& text, float x, float y, float c1r, float c1g, float c1b, float c2r, float c2g, float c2b, float scale, float border, int style) {
+	if (gGameContext) {
+		if (gGameContext->gPlatform) {
+			return gGameContext->gPlatform->gGuiContext->RenderButton(face, text, x, y, glm::vec3(c1r, c1g, c1b), glm::vec3(c2r, c2g, c2b), scale, border, (MButtonStyle)style);
+		}
+	}
+	return MButtonEvent();
+}
+
+void Gui_RenderText(const std::string& face, const std::string& text, float posx, float posy, float cr, float cg, float cb, float scale) {
+	if (gGameContext) {
+		if (gGameContext->gPlatform) {
+			gGameContext->gPlatform->gGuiContext->RenderText(face, text, posx, posy, glm::vec3(cr, cg, cb), scale);
+		}
+	}
 }

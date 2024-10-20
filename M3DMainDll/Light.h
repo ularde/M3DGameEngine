@@ -18,8 +18,6 @@ public:
 	virtual void Save()override;
 	virtual void InitializeLuaInstance()override;
 	virtual void Update(double delta_time)override;
-	virtual void Render()override;
-	virtual void RenderForDepthMapping()override { }
 	unsigned int GetLightID() { return this->lightID; }
 public:
 	void SetPosition(double x, double y, double z) { mPosition.x = x; mPosition.y = y; mPosition.z = z; }
@@ -46,8 +44,6 @@ public:
 	virtual void Save()override {}
 	virtual void InitializeLuaInstance()override;
 	virtual void Update(double dt)override;
-	virtual void Render()override;
-	virtual void RenderForDepthMapping()override { }
 	unsigned int GetLightID() { return this->lightID; }
 private:
     MTimeOfDay* mTimeOfDay = NULL;

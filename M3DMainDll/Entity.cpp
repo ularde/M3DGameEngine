@@ -9,15 +9,15 @@
 class MScene;
 
 MEntity::MEntity(MScene* parent_, const std::string& name_, const std::string& def_file_path_, const std::string& script_path_,
-	const glm::vec3& position_, const glm::vec3& scale_, const glm::vec3& rotate_) {
-	this->mClassName = "Entity";
+	const glm::vec3& position_, const glm::vec3& scale_, const glm::vec4& rotate_) {
+	this->mPrototypeName = "Entity";
 	this->mParent = parent_;
-	this->position = position_;
-	this->scale = scale_;
-	this->rotate = rotate_;
+	this->mPosition = position_;
+	this->mScale = scale_;
+	this->mRotate = rotate_;
 	this->mDefFilePath = def_file_path_;
 	this->gPlatform = this->mParent->GetPlatform();
-	this->name = name_;
+	this->mName = name_;
 	this->LoadDefinition();
 	this->mEditorAgent = new MActorEditorAgent(gPlatform, this);
 	gPlatform->gGameContext->gThisEntity = this;
@@ -40,7 +40,7 @@ void MEntity::LoadDefinition() {
 		tinyxml2::XMLElement* componentNode = root->FirstChildElement("EntityComponent");
 
 		this->mLuaScriptPath = root->Attribute("script");
-		this->secondaryClassName = root->Attribute("name");
+		this->mClassName = root->Attribute("name");
 
 		InitializeLuaInstance();
 
@@ -50,7 +50,7 @@ void MEntity::LoadDefinition() {
 			componentName = componentNode->Attribute("name");
 			componentClass = componentNode->Attribute("class");
 
-			if (componentClass == "StaticMesh") {
+			if (componentClass == "StaticMeshComponent") {
 				this->AddStaticMesh(componentName, componentNode);
 			}
 			else if (componentClass == "RigidBodyPhysicsProxySphere") {
@@ -238,20 +238,6 @@ void MEntity::Update(double dt) {
 		this->components[i]->Update(dt);
 	}
 }
-
-void MEntity::Render() {
-	gPlatform->gGameContext->gThisEntity = this;
-	for (unsigned int i = 0; i < this->components.size(); i++) {
-		this->components[i]->Render();
-	}
-}
-
-void MEntity::RenderForDepthMapping() {
-	for (unsigned int i = 0; i < this->components.size(); i++) {
-		this->components[i]->RenderForDepthMapping();
-	}
-}
-
 void MEntity::InitializeLuaInstance() {
 	//import the script
 	gPlatform->gLuaState->safe_script_file(GetFullAssetPathA(mLuaScriptPath));
@@ -270,15 +256,15 @@ void MEntity::AddStaticMesh(const std::string& name, tinyxml2::XMLElement* node)
 	float scale_x = 0.0f, scale_y = 0.0f, scale_z = 0.0f;
 	num = GetVec3FromString(scaleStr, &scale_x, &scale_y, &scale_z);
 	assert(num == 3);
-	float rotate_x = 0.0f, rotate_y = 0.0f, rotate_z = 0.0f;
-	num = GetVec3FromString(rotateStr, &rotate_x, &rotate_y, &rotate_z);
-	assert(num == 3);
+	float rotate_w = 0.0f, rotate_x = 0.0f, rotate_y = 0.0f, rotate_z = 0.0f;
+	num = GetVec4FromString(rotateStr, &rotate_x, &rotate_y, &rotate_z, &rotate_w);
+	assert(num == 4);
 
-	MStaticMesh* object = new MStaticMesh(this, this->componentMap[physicsProxyName],
+	MStaticMeshComponent* object = new MStaticMeshComponent(this, this->componentMap[physicsProxyName],
 		name, modelPath,
 		glm::vec3(pos_x, pos_y, pos_z),
 		glm::vec3(scale_x, scale_y, scale_z),
-		glm::vec3(rotate_x, rotate_y, rotate_z));
+		glm::vec4(rotate_x, rotate_y, rotate_z, rotate_w));
 	this->components.push_back(object);
 	this->componentMap[name] = object;
 }

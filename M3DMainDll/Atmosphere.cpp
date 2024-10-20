@@ -15,7 +15,7 @@ class MCameraComponent;
 MAtmosphere::MAtmosphere(MScene* parent, const std::string& name_) {
 	mParent = parent;
 	gPlatform = mParent->GetPlatform();
-	name = name_;
+	mName = name_;
 }
 
 MAtmosphere::~MAtmosphere() {
@@ -33,22 +33,6 @@ void MAtmosphere::InitializeLuaInstance()
 
 void MAtmosphere::Update(double dt) {
 
-}
-
-void MAtmosphere::Render() {
-	glm::mat4 modelMatrix(1.0f);
-	if (mParent->IsEditorMode() && mParent->gEditorCamera) {
-		modelMatrix = glm::translate(glm::mat4(1.0f), mParent->gEditorCamera->position);
-	}
-	else if (mParent->gLocalCamera) {
-		modelMatrix = glm::translate(glm::mat4(1.0f), mParent->gLocalCamera->mPosition);
-	}
-	gPlatform->gAtomspherePipeline->LoadMatrix(MMatrixType::MODEL, modelMatrix);
-	gPlatform->gAtomspherePipeline->SelectShader("atmosphere");
-	gPlatform->gAtomspherePipeline->GetCurrentAtomsphereShader()->UniformVec3("sunDir", mTimeOfDay->GetSunDirection());
-	gPlatform->gAtomspherePipeline->BeginRendering();
-	RenderSphere();
-	gPlatform->gAtomspherePipeline->EndRendering();
 }
 
 void MAtmosphere::UpdateParameters() {

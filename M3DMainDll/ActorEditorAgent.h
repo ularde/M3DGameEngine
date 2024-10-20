@@ -472,6 +472,10 @@ public:
     void Translate(MAxis axis, double len);
     void Rotate(MAxis axis, double angle);
     void Scale(MAxis axis, double level);
+    float GetAxisLength();
+    float GetConeHeight();
+    float GetConeBase();
+    float GetSphereRadius();
 	bool IsFocused() { return mFocused; }
 	bool IsSelected() { return mSelected; }
 protected:

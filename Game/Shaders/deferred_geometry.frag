@@ -1,7 +1,7 @@
 #version 430 core
 
 layout (location = 0) out vec3 Position;
-layout (location = 1) out vec3 Normal;
+layout (location = 1) out vec4 Normal;
 layout (location = 2) out vec4 Albedo;
 layout (location = 3) out vec4 MRA;
 
@@ -45,7 +45,14 @@ void main()
         tangentNormal = texture(texture_normal, vTexCoords).xyz * 2.0 - 1.0;
     }
     Position = vPosition;
-    Normal = normalize(vTBN * tangentNormal);
+    Normal.xyz = normalize(vTBN * tangentNormal);
+
+    const float far = 1000.0;
+    const float near = 0.3;
+    float d = gl_FragCoord.z * 2.0 - 1.0;
+    //d = (2.0 * near) / (far + near - d * (far - near));
+    Normal.a = d;
+
     Albedo = vec4(texture(texture_albedo, vTexCoords).rgb + albedo_color, 0.0);
     MRA.r = texture(texture_metallic, vTexCoords).r + metallic_color;
     MRA.g = texture(texture_roughness, vTexCoords).r + roughness_color;

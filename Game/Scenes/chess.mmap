@@ -1,10 +1,10 @@
 <Scene name="Chess" script="Scripts\Gameplay\chess.lua">
     <TimeOfDay dynamic="1" speed="100" xoffset="0.2" iSun="22" rPlanet="6371000" rAtmos="6471000" kRlh="0.000006,0.000013,0.000022" kMie="2.1e-05" shRlh="8000" shMie="1200" g="0.75800002"/>
-    <Actor class="Entity" name="LocalPlayer" def="Scripts\Actors\Entities\ChessCamera.ment" position="6.0000000,1.00000000,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
-    <Actor class="RigidStatic" name="Ground" model="Objects\floor2\floor2.obj" material="" position="0.000000,-0.8279198,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
-    <Actor class="Entity" name="Entity0" def="Scripts\Actors\Entities\BasicEntity.ment" position="60.000000,0.5000000,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
-    <Actor class="RigidStatic" name="RigidStatic1" model="Objects\pyramid\pyramid.obj" material="" position="-1.6552851,-0.8279204,-3.7898331" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
-    <Actor class="RigidStatic" name="RigidStatic2" model="Objects\pyramid\pyramid.obj" material="" position="2.1634691,-0.8279202,-2.4400829" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
-    <Actor class="RigidStatic" name="RigidStatic3" model="Objects\pyramid\pyramid.obj" material="" position="-0.7140724,-0.8279193,2.9823025" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
-    <Actor class="RigidStatic" name="RigidStatic4" model="Objects\pyramid\pyramid.obj" material="" position="-5.7451035,-0.8279197,0.3945328" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000"/>
+    <Actor class="Entity" name="LocalPlayer" def="Scripts\Actors\Entities\ChessCamera.ment" position="6.000000,1.000000,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="Ground" model="Objects\floor2\floor2.obj" material="" position="0.000000,-0.827920,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="Entity" name="Entity0" def="Scripts\Actors\Entities\BasicEntity.ment" position="60.000000,0.500000,0.000000" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic1" model="Objects\pyramid\pyramid.obj" material="" position="-1.655285,-0.827920,-3.789833" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic2" model="Objects\pyramid\pyramid.obj" material="" position="3.089552,-0.827920,0.163495" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic3" model="Objects\pyramid\pyramid.obj" material="" position="-0.714072,-0.827919,2.982302" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
+    <Actor class="RigidStatic" name="RigidStatic4" model="Objects\pyramid\pyramid.obj" material="" position="-5.745103,-0.827920,0.394533" scale="1.000000,1.000000,1.000000" rotate="0.000000,0.000000,0.000000,1.000000"/>
 </Scene>

@@ -27,7 +27,7 @@ void MSceneEditorAgent::CreateRigidStatic(const std::string& model) {
 	for (unsigned int i = 0u; i < mParent->mActors.size(); i++) {
 		if (mParent->mActors[i]->mClassName == "RigidStatic") {
 			MRigidStatic* csm = reinterpret_cast<MRigidStatic*>(mParent->mActors[i]);
-			const char* objName = csm->name.c_str();
+			const char* objName = csm->mName.c_str();
 			int n = 0;
 			if (sscanf(objName, "RigidStatic%d", &n) == 1) {
 				objIDs.push_back(n);
@@ -41,7 +41,7 @@ void MSceneEditorAgent::CreateRigidStatic(const std::string& model) {
 	//create object
 	std::string name = std::string("RigidStatic") + std::to_string(maxID + 1);
 	glm::vec3 position(0.0f, 0.0f, 0.0f);
-	MRigidStatic* object = new MRigidStatic(mParent, name, model, "", position, glm::vec3(1.0f), glm::vec3(0.0f));
+	MRigidStatic* object = new MRigidStatic(mParent, name, model, "", position, glm::vec3(1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	mCreatingActor = object;
 	mParent->mActors.push_back(object);
 	mParent->mActorMap[name] = object;
@@ -111,6 +111,8 @@ void MSceneEditorAgent::Tick() {
 	glm::vec3 ray = glm::normalize(ray_end - ray_start);
 	glm::vec3 ppos(0.0f);
 	glm::vec3 pos(0.0f);
+	float rot = 0.0f;
+	static float lrot = 0.0f, drot = 0.0f;
 	if (target) {
 		ppos = target->GetPositionWorldCoordSys();
 		float d = glm::dot(target->GetPositionWorldCoordSys() - mParent->gEditorCamera->position, mParent->gEditorCamera->front) / glm::dot(ray, mParent->gEditorCamera->front);
@@ -150,6 +152,41 @@ void MSceneEditorAgent::Tick() {
 		for (unsigned int i = 0; i < mParent->mActors.size(); i++) {
 			if (mParent->mActors[i]->mEditorAgent) {
 				mParent->mActors[i]->mEditorAgent->Render();
+				if (mParent->mActors[i]->mEditorAgent->IsSelected()) {
+					if (mXAxisSelected) {
+						glm::vec2 winpos = mParent->mActors[i]->mEditorAgent->GetPositionWinCoordSys();
+						glm::vec2 v1 = glm::normalize(mParent->mActors[i]->mEditorAgent->GetAxisTopPosWinCoordSys(MAxis::X_AXIS) - winpos);
+						glm::vec2 v2 = glm::normalize(cpos - winpos);
+						rot = acos(glm::dot(v1, v2));
+						drot = rot - lrot;
+						if (drot) {
+							mParent->mActors[i]->mEditorAgent->Rotate(MAxis::X_AXIS, glm::radians(rot));
+						}
+						lrot = rot;
+					}
+					else if (mYAxisSelected) {
+						glm::vec2 winpos = mParent->mActors[i]->mEditorAgent->GetPositionWinCoordSys();
+						glm::vec2 v1 = glm::normalize(mParent->mActors[i]->mEditorAgent->GetAxisTopPosWinCoordSys(MAxis::Y_AXIS) - winpos);
+						glm::vec2 v2 = glm::normalize(cpos - winpos);
+						rot = acos(glm::dot(v1, v2));
+						drot = rot - lrot;
+						if (drot) {
+							mParent->mActors[i]->mEditorAgent->Rotate(MAxis::Y_AXIS, glm::radians(rot));
+						}
+						lrot = rot;
+					}
+					else if (mZAxisSelected) {
+						glm::vec2 winpos = mParent->mActors[i]->mEditorAgent->GetPositionWinCoordSys();
+						glm::vec2 v1 = glm::normalize(mParent->mActors[i]->mEditorAgent->GetAxisTopPosWinCoordSys(MAxis::Z_AXIS) - winpos);
+						glm::vec2 v2 = glm::normalize(cpos - winpos);
+						rot = acos(glm::dot(v1, v2));
+						drot = rot - lrot;
+						if (drot) {
+							mParent->mActors[i]->mEditorAgent->Rotate(MAxis::Z_AXIS, glm::radians(rot));
+						}
+						lrot = rot;
+					}
+				}
 			}
 		}
 		if (!gPlatform->GetMouseLeftButtonDown()) {
@@ -193,7 +230,7 @@ void MSceneEditorAgent::Tick() {
 					}
 					mParent->pScene->flushQueryUpdates();
 				}
-				else if (mCreatingActor->mClassName == "Entity") {
+				else if (mCreatingActor->mPrototypeName == "Entity") {
 					//ray casting (for creating Entity)
 					//...
 					//temporarily remove the actor from the PxScene
@@ -216,7 +253,7 @@ void MSceneEditorAgent::Tick() {
 				if (mCreatingActor->mClassName == "RigidStatic") {
 					mParent->pScene->addActor(*rs->pActor);
 				}
-				else if (mCreatingActor->mClassName == "Entity") {
+				else if (mCreatingActor->mPrototypeName == "Entity") {
 					for (unsigned int i = 0u; i < ent->components.size(); i++) {
 						if (ent->components[i]->IsRigidBodyPhysicsProxy()) {
 							mParent->pScene->addActor(*reinterpret_cast<MRigidBodyPhysicsProxy*>(ent->components[i])->GetPxActor());

@@ -1,0 +1,10 @@
+<Material name="red-model">
+<SubMaterial name="Material" index="0" use_color="1" forward_pipeline="1" surface_type="Stone">
+<Texture type="texture_albedo" path="" color="0.0,0.0,1.0"/>
+<Texture type="texture_normal" path=""/>
+<Texture type="texture_metallic" path="" color="0.38"/>
+<Texture type="texture_roughness" path="" color="0.18"/>
+<Texture type="texture_AO" path="" color="1.0"/>
+<Texture type="texture_opacity" path="" color="0.7"/>
+</SubMaterial>
+</Material>

@@ -7,10 +7,14 @@
 #ifndef PCH_H
 #define PCH_H
 
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define GLFW_EXPOSE_NATIVE_WGL
+
 // 添加要在此处预编译的标头
 #include "framework.h"
 #include "glad.h"
 #include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 
 #include "tinyxml2.h"
 
@@ -27,14 +31,13 @@
 #include <fstream>
 #include <random>
 
-#include <freetype/freetype.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <FTGL/ftgl.h>
 
 #include "Global.h"
+#include "SharedFunc.h"
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
@@ -45,5 +48,7 @@
 
 #include <lua.hpp>
 #include <sol/sol.hpp>
+#include <ft2build.h>
+#include FT_FREETYPE_H  
 
 #endif //PCH_H

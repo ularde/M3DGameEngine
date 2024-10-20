@@ -9,10 +9,11 @@
 #include "AssetManager.h"
 #include "Mesh.h"
 #include "Global.h"
+#include "Class.h"
 
 class MAsset;
 class MAssetManager;
-class MMesh;
+class MTriangleMesh;
 class MMaterial;
 
 class MModel :public MAsset {
@@ -27,21 +28,28 @@ public:
 	bool GetUseCustomMaterialFlag() { return mUseCustomMaterial; }
 	void PushUseCustomMaterialFlag() { mUseCustomMaterialStack = mUseCustomMaterial; }
 	void PopUseCustomMaterialFlag() { mUseCustomMaterial = mUseCustomMaterialStack; }
-	void Render();
+	void CommitGeometryInstances();
 	void RenderForDepthMapping();
 	void ProcessNode(aiNode* node);
 	void LoadModel();
 	void LoadMaterial();
+	void DeclareOccupation(MScriptableObject* object) { mPresentOwner = object; }
 	void SetMaterial(MMaterial* mat);
 	void InitializePhysics();
 	int GetMeshSurfaceTypeID(unsigned int ID);
-	MMesh GenerateMMesh(aiMesh* mesh);
+	void ResetTransparentMeshIterator() { mCurrentTransparentMeshID = 0u; }
+	MMaterial* GetMaterial();
+	MTriangleMesh* FirstTransparentMesh();
+	MTriangleMesh* NextTransparentMesh();
+	MTriangleMesh GenerateMMesh(aiMesh* mesh);
 private:
+	unsigned int mCurrentTransparentMeshID = 0;
 	bool mUseCustomMaterial = false;
 	bool mUseCustomMaterialStack = false;
 	unsigned int meshCount = 0;
 	const aiScene* mAssimpScene;
-	std::vector<MMesh> mMeshes;
+	std::vector<MTriangleMesh> mMeshes;
 	std::string mMaterialPath;
+	MScriptableObject* mPresentOwner = NULL;
 	MMaterial* mMaterial = NULL, * mInitialMaterial = NULL;
 };

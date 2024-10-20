@@ -19,6 +19,7 @@ class MDirectionalLight;
 class MSceneEditorAgent;
 class MCinematicCamera;
 class MFirstPersonCamera;
+class MTriangleMesh;
 
 class MScene :public MBasicContainer {
 public:
@@ -63,19 +64,20 @@ public:
 	std::vector<MActor*> mActors;
 	std::map<std::string, MActor*> mActorMap;
 protected:
+	std::vector<MTriangleMesh*> gRenderOpaqueMeshQueue;
+	std::vector<MTriangleMesh*> gRenderTransparentMeshQueue;
+	bool mDummyFlag = false;
 	bool mEditorModeFlag = false;
 	bool mLoaded = false;
 	tinyxml2::XMLDocument mSceneDoc;
 	void InitializePhysics();
 	void UpdatePhysics(double dt);
 	void LoadScene();
-	void AddPlayer(const std::string& name, tinyxml2::XMLElement* root);
 	void AddRigidStatic(const std::string& name, tinyxml2::XMLElement* root);
 	void AddPointLight(const std::string& name, tinyxml2::XMLElement* root);
 	void AddDirectionLight(const std::string& name, tinyxml2::XMLElement* root);
 	void AddSpotLight(const std::string& name, tinyxml2::XMLElement* root);
 	void AddEntity(const std::string& name, tinyxml2::XMLElement* root);
-	void AddSkybox(const std::string& name, tinyxml2::XMLElement* root);
 	void AddCharacterController(const std::string& name, tinyxml2::XMLElement* root);
 	void AddRagdoll(const std::string& name, tinyxml2::XMLElement* root);
 	void GenerateFunctionNames();

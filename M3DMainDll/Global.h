@@ -26,6 +26,11 @@
 
 extern GLuint publicID;
 
+enum class MPlatformType {
+	GAME,
+	EDITOR
+};
+
 enum class MPlatformMode {
 	SCENE,
 	FORM

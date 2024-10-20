@@ -9,6 +9,7 @@
 #include "GameConsole.h"
 #include "BackgroundQuad.h"
 #include "PhysXInterface.h"
+#include "Platforms.h"
 
 class MBasicContainer;
 class MGameConsole;
@@ -24,6 +25,10 @@ class MRenderAtomspherePipeline;
 class MRenderDepthMappingPipeline;
 class MRenderEnvironmentPipeline;
 class MRenderOcclusionQueryPipeline;
+class MRenderForwardPipeline;
+class MRenderGuiPipeline;
+class MGuiContext;
+class MScene;
 
 void OfflineGame_CharCallback(GLFWwindow* window, unsigned int codepoint);
 void OfflineGame_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -36,8 +41,12 @@ inline HWND gHWND = 0;
 
 class MBasicPlatform {
 public:
+	HDC m_DC = 0;
 	GLuint gDefaultFBO = 0;
 	MAssetManager* gAssetManager = NULL;
+	wchar_t gDriver[1024] = { 0 };
+	bool gSSDOFlag = false;
+	bool gGalliumFlag = false;
 	bool gFullscreenFlag = false;
 	bool mCursorDisabled = false;
 	int gShadowQuality = 1;
@@ -49,6 +58,8 @@ public:
 	virtual void Update() = 0;
 	virtual int GetWindowWidth() = 0;
 	virtual int GetWindowHeight() = 0;
+	bool IsEditor() { return (gType == MPlatformType::EDITOR); }
+	bool IsGame() { return (gType == MPlatformType::GAME); }
 	double GetFPS() { return this->FPS; }
 	double GetDeltaTime() { return this->deltaTime; }
 	virtual double GetTime() = 0;
@@ -71,11 +82,17 @@ public:
 	double GetScrollOffsetY() { return this->mScrollOffsetY; }
 	void LoadScene(const std::string& path);
 	void LoadUIForm(const std::string& path);
+	void UpdateDepthMappingPipeline();
+	void UpdateFullscreenState();
+	MScene* GetCurrentScene() { if (gMode == MPlatformMode::SCENE) { return reinterpret_cast<MScene*>(gCurrentContainer); } return 0; }
 	MPlatformMode gMode;
+	MPlatformType gType;
 	MBasicContainer* gCurrentContainer = NULL;
 	MRenderDeferredPipeline* gDeferredPipeline = NULL;
 	MRenderAtomspherePipeline* gAtomspherePipeline = NULL;
 	MRenderDepthMappingPipeline* gDepthMappingPipeline = NULL;
+	MRenderGuiPipeline* gGuiPipeline = NULL;
+	MRenderForwardPipeline* gForwardPipeline = NULL;
 	Assimp::Importer assimpImporter;
 	MUserErrorCallback gErrorCallback;
 	MPxAllocatorCallback gAllocatorCallback;
@@ -89,6 +106,8 @@ public:
 		* gMudMaterial = NULL;
 	MGameConsole* gGameConsole = NULL;
 	MGameContext* gGameContext = NULL;
+	MGuiContext* gGuiContext = NULL;
+	FT_Library mFreetypeLib;
 	float mouseSensitivity = 0.1f;
 protected:
 	double lastFrameTime = 0.0, currentFrameTime = 0.0;
@@ -103,6 +122,7 @@ protected:
 	tinyxml2::XMLDocument* gameConfigDoc = NULL;
 	void InitializePhysX();
 	void InitializePipeline();
+	void InitializeMImGui();
 	void LoadGlobalConfig();
 };
 
@@ -129,7 +149,7 @@ public:
 	void SetCursorInvisible();
 	virtual void SetCursorVisible()override;
 private:
-	GLFWwindow* window;
+	GLFWwindow* gWindow;
 	void SplashScreen();
 protected:
 };

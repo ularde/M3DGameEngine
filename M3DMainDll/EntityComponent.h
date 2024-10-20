@@ -7,7 +7,7 @@ class MUnscriptableObject;
 class MEntity;
 class MAssetManager;
 class MBasicPlatform;
-class MStaticMesh;
+class MStaticMeshComponent;
 class MSkeletonMesh;
 class MRigidBodyPhysicsProxy;
 class MMeshComponent;
@@ -30,11 +30,8 @@ public:
 	MEntity* GetParent() { return mParent; }
 	virtual void InitializeLuaInstance()override {};
 	virtual void Update(double delta_time) = 0;
-	virtual void Render() = 0;
-	virtual void RenderForDepthMapping() = 0;
 protected:
 	void OnUpdate(double dt);
-	void OnRender();
 	void OnCreate();
 	void OnDestroy();
 	void GeneratePublicFunctionNames();
@@ -48,18 +45,18 @@ class MMeshComponent :public MEntityComponent {
 public:
 	MModel* model = NULL;
 	MAssetManager* gAssetManager = NULL;
-	MBasicPlatform* gPlatform = NULL;
 	MRigidBodyPhysicsProxy* mPhysicsProxy = NULL;
 	std::string mModelPath;
-	glm::vec3 position, scale, rotate;
+	glm::vec3 mPosition, mScale;
+	glm::vec4 mRotate;
 };
 
 class MRigidBodyPhysicsProxy :public MEntityComponent {
 public:
 	bool mIsKinematic = false;
-	bool mClientAssigned = false;
+	bool mOutputMeshAttachmentAssigned = false;
 	virtual glm::mat4 GetModelMatrix() = 0;
-	virtual void SetClient(const std::string& name) = 0;
+	virtual void SetOutputAttachment(const std::string& name) = 0;
 	glm::vec3 GetPosition();
 	void SetPosition(double x, double y, double z);
 	void AddForce(double x, double y, double z, int mode);
@@ -69,7 +66,7 @@ public:
 	physx::PxRigidDynamic* GetPxActor() { return pActor; }
 protected:
 	int mSurfaceTypeID = 0;
-	MMeshComponent* mClient = NULL;
+	MMeshComponent* mOutputMeshAttachment = NULL;
 	physx::PxMaterial* pMaterial = NULL;
 	physx::PxRigidDynamic* pActor = NULL;
 	physx::PxTransform transform;
@@ -85,9 +82,7 @@ public:
 		int surface_type_ID, bool is_kinematic);
 	~MRigidBodyPhysicsProxySphere() { }
 	virtual void Update(double delta_time)override;
-	virtual void Render()override;
-	virtual void RenderForDepthMapping()override { }
-	virtual void SetClient(const std::string& name)override;
+	virtual void SetOutputAttachment(const std::string& name)override;
 	virtual glm::mat4 GetModelMatrix()override;
 protected:
 	float mRadius, mDensity;
@@ -108,9 +103,7 @@ public:
 		const float step_offset, const float max_jump_height, int surface_type_ID);
 	~MCharacterController();
 	virtual void Update(double dt)override;
-	virtual void Render()override;
-	virtual void RenderForDepthMapping()override { }
-	virtual void SetClient(const std::string& name)override;
+	virtual void SetOutputAttachment(const std::string& name)override;
 	virtual glm::mat4 GetModelMatrix()override;
 	void AttachCamera(const std::string& name);
 	void Move(MCCTMovementType type, double dt);
@@ -122,8 +115,9 @@ public:
 	float cGravity = -9.81f;
 protected:
 	std::string mCameraName;
-	MCameraComponent* mCameraAttachment = NULL;
-	bool mCameraAttached = false;
+	MCameraComponent* mInputCameraAttachment = NULL;
+	MMeshComponent* mOutputMeshAttachment = NULL;
+	bool mInputCameraAttached = false;
 	glm::vec3 mFootPosition,
 		mControllerPosition,
 		mEyePosition,
@@ -137,12 +131,12 @@ protected:
 
 class MCameraComponent :public MEntityComponent {
 public:
-	bool mHostAssigned = false;
+	bool mOwned = false;
 	glm::vec3 mPosition, mFront,
 		mMovementFront,
 		mMovementRight, mWorldUp,
 		mUpDirection, mRight;
-	void SetHost(MCharacterController* obj);
+	void SetOwner(MCharacterController* obj);
 	virtual void SubmitMousePosition(double xpos, double ypos) = 0;
 	virtual void ProcessMovement(double dt) = 0;
 	virtual glm::mat4 GetViewMatrix() = 0;
@@ -150,7 +144,7 @@ public:
 protected:
 	void GeneratePrivateFunctionNames();
 	std::string nOnCursorInput;
-	MCharacterController* mHost = NULL;
+	MCharacterController* mOwner = NULL;
 };
 
 class MFirstPersonCamera :public MCameraComponent {
@@ -159,8 +153,6 @@ public:
 		const glm::vec3& i_front);
 	~MFirstPersonCamera();
 	virtual void Update(double dt)override;
-	virtual void Render()override;
-	virtual void RenderForDepthMapping()override { }
 	virtual void SubmitMousePosition(double xpos, double ypos)override;
 	virtual void ProcessMovement(double dt)override;
 	virtual glm::mat4 GetViewMatrix()override;
@@ -178,8 +170,6 @@ public:
 	void SetUp(const glm::vec3& up);
 	void SetFovy(const double fovy);
 	virtual void Update(double dt)override;
-	virtual void Render()override;
-	virtual void RenderForDepthMapping()override { }
 	virtual void SubmitMousePosition(double xpos, double ypos)override;
 	virtual void ProcessMovement(double dt)override;
 	virtual glm::mat4 GetViewMatrix()override;
@@ -187,16 +177,14 @@ public:
 	float mFovy = 60.0f;
 };
 
-class MStaticMesh :public MMeshComponent {
+class MStaticMeshComponent :public MMeshComponent {
 public:
-	MStaticMesh(MEntity* parent_, MEntityComponent* physics_proxy, 
+	MStaticMeshComponent(MEntity* parent_, MEntityComponent* physics_proxy, 
 		const std::string& name_, const std::string& model_path_,
-		const glm::vec3& position_, const glm::vec3& scale_, const glm::vec3& rotate_);
-	~MStaticMesh();
+		const glm::vec3& position_, const glm::vec3& scale_, const glm::vec4& rotate_);
+	~MStaticMeshComponent();
 	void LoadModelAsset();
 	virtual void Update(double delta_time)override;
-	virtual void Render()override;
-	virtual void RenderForDepthMapping()override;
 };
 
 class MSkeletonMesh :public MMeshComponent {

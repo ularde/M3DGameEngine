@@ -110,18 +110,19 @@ void CFileView::FillFileView(HTREEITEM ftree, CString fn)
 
 		while (working)
 		{
+			wchar_t* str = 0;
 			working = finder.FindNextFile();
 			CString fpath = finder.GetFilePath();
 			if (!finder.IsDirectory())
 			{
 				HTREEITEM file = m_wndFileView.InsertItem(finder.GetFileName(), 2, 2, ftree);
-				const wchar_t* tstr = fpath.GetString();
-				//wchar_t* str = (wchar_t*)malloc(sizeof(wchar_t) * lstrlen(tstr));
-				//lstrcpy(str, tstr);
-				wchar_t* str = (wchar_t*)malloc(sizeof(wchar_t) * fpath.GetLength());
-				if (str) {
-					lstrcpy(str, tstr);
-				}
+				int len = fpath.GetLength();
+				str = (wchar_t*)malloc(sizeof(wchar_t) * len);
+#ifdef DEBUG
+				lstrcpy(str, (wchar_t*)fpath.GetString());
+#else
+				memcpy(str, (wchar_t*)fpath.GetString(), sizeof(wchar_t) * len);
+#endif // DEBUG
 				m_wndFileView.SetItemData(file, (DWORD_PTR)str);
 			}
 			else
@@ -221,10 +222,11 @@ void CFileView::OnProperties()
 void CFileView::OnFileOpen()
 {
 	HTREEITEM selectedItem = m_wndFileView.GetSelectedItem();
-	const wchar_t* path = (wchar_t*)m_wndFileView.GetItemData(selectedItem);
-	CString str = path;
-	CString relativePath = str.Right(str.GetLength() - rootDirFullPath.GetLength());
-	CString ename = str.Right(str.GetLength() - str.ReverseFind('.'));
+	wchar_t* raw = (wchar_t*)m_wndFileView.GetItemData(selectedItem);
+	CString path = (wchar_t*)m_wndFileView.GetItemData(selectedItem);
+	CString relativePath = path.Right(path.GetLength() - rootDirFullPath.GetLength());
+	CString ename = path.Right(path.GetLength() - path.ReverseFind('.'));
+	char* aRelativePath = 0;
 	if (ename == _T(".mmap"))
 	{
 		theApp.OpenScene(path);
@@ -239,15 +241,17 @@ void CFileView::OnFileOpen()
 	}
 	else if (ename == _T(".obj"))
 	{
-		char aRelativePath[8192] = { 0 };
-		wcstombs(aRelativePath, relativePath.GetString(), 8192);
+		aRelativePath = (char*)malloc(sizeof(char) * path.GetLength());
+		wcstombs(aRelativePath, relativePath.GetString(), path.GetLength());
 		PIEditor_CreateRigidStatic(aRelativePath);
+		free(aRelativePath);
 	}
 	else if (ename == _T(".fbx"))
 	{
-		char aRelativePath[8192] = { 0 };
-		wcstombs(aRelativePath, relativePath.GetString(), 8192);
+		aRelativePath = (char*)malloc(sizeof(char) * path.GetLength());
+		wcstombs(aRelativePath, relativePath.GetString(), path.GetLength());
 		PIEditor_CreateRigidStatic(aRelativePath);
+		free(aRelativePath);
 	}
 	// TODO: 在此处添加命令处理程序代码
 }

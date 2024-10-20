@@ -160,6 +160,8 @@ void MShaderProgram::AttachShader(MShaderType type, const std::string& path) {
 	LoadShaderFile(path);
 	const char* code = tempShaderCode.c_str();
 
+	mPlatform->gGameConsole->WriteLine(1.0f, 1.0f, 1.0f, "shader " + path + " compiling.");
+
 	switch (type)
 	{
 	case MShaderType::PROGRAM:
@@ -188,6 +190,7 @@ void MShaderProgram::AttachShader(MShaderType type, const std::string& path) {
 }
 
 void MShaderProgram::LinkProgram() {
+	mPlatform->gGameConsole->WriteLine(1.0f, 1.0f, 1.0f, "shader program linking.");
 	glLinkProgram(mProgramID);
 	CheckCompileStatus(MShaderType::PROGRAM);
 }
@@ -286,6 +289,6 @@ GLuint MShaderProgram::CheckCompileStatus(MShaderType type) {
 	}
 
 	printf("%s\n", infoLog);
-
+	mPlatform->gGameConsole->WriteLine(1.0f, 0.0f, 0.0f, std::string(infoLog));
 	return status;
 }

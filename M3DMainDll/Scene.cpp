@@ -2,11 +2,9 @@
 #include "Scene.h"
 #include "SharedFunc.h"
 #include "Actor.h"
-#include "Player.h"
 #include "RigidStatic.h"
 #include "Light.h"
 #include "Entity.h"
-#include "Skybox.h"
 #include "Atmosphere.h"
 #include "RenderDeferredPipeline.h"
 #include "RenderAtomspherePipeline.h"
@@ -16,6 +14,9 @@
 #include "TimeOfDay.h"
 #include "ActorEditorAgent.h"
 #include "SceneEditorAgent.h"
+#include "Model.h"
+#include "Mesh.h"
+#include "Camera.h"
 
 class MActor;
 class MPlayer;
@@ -28,12 +29,14 @@ class MSkybox;
 class MCameraComponent;
 class MTimeOfDay;
 class MAtmosphere;
+class MModel;
+class MTriangleMesh;
 
 MScene::MScene(bool immediately_load, MBasicPlatform* platform, const std::string& path_) {
 	this->gPlatform = platform;
 	this->path = path_;
 	this->mClassName = "Scene";
-	this->mFatherClassName = "Container";
+	this->mPrototypeName = "Container";
 	if (this->mSceneDoc.LoadFile(this->path.c_str()) != tinyxml2::XML_SUCCESS) {
 		MessageBox(NULL, L"Failed to load scene from an XML document.", L"M3D GameEngine", MB_ICONERROR);
 	}
@@ -61,57 +64,72 @@ void MScene::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
 void MScene::Update(double dt) {
 	if (this->mLoaded) {
 		this->OnPreUpdate(dt);
-		if (this->mEditorModeFlag) {
-			this->mTimeOfDay->SetDynamic(false);
-		}
-		this->mTimeOfDay->Update();
-		this->mSunLight->Update(dt);
-		for (unsigned int i = 0; i < this->mActors.size(); i++) {
-			this->mActors[i]->Update(dt);
-		}
-		if (!this->mEditorModeFlag) {
-			if (gPlatform->GetKey(VK_ESCAPE) == 1) {
-				reinterpret_cast<MEditor*>(gPlatform)->ExitGame();
+		if (!this->mDummyFlag) {
+			if (this->mEditorModeFlag) {
+				this->mTimeOfDay->SetDynamic(false);
 			}
-			this->UpdatePhysics(dt);
-		}
-		if (this->gLocalCamera && !this->mEditorModeFlag) {
-			this->gLocalCamera->SubmitMousePosition(gPlatform->GetCursorPosX(), gPlatform->GetCursorPosY());
-			glm::mat4 projection = gLocalCamera->GetProjectionMatrix();
-			glm::mat4 view = gLocalCamera->GetViewMatrix();
-			gPlatform->gDeferredPipeline->SetCameraPosition(gLocalCamera->mPosition);
-			gPlatform->gDeferredPipeline->LoadMatrix(MMatrixType::PROJECTION, projection);
-			gPlatform->gAtomspherePipeline->LoadMatrix(MMatrixType::PROJECTION, projection);
-			gPlatform->gDeferredPipeline->LoadMatrix(MMatrixType::VIEW, view);
-			gPlatform->gAtomspherePipeline->LoadMatrix(MMatrixType::VIEW, view);
-		}
-		else {
-			this->gEditorCamera->SubmitMousePosition(gPlatform->GetCursorPosX(), gPlatform->GetCursorPosY());
-			this->gEditorCamera->ProcessMovement();
-			glm::mat4 projection = this->gEditorCamera->GetProjectionMatrix();
-			glm::mat4 view = this->gEditorCamera->GetViewMatrix();
-			gPlatform->gDeferredPipeline->SetCameraPosition(this->gEditorCamera->position);
-			gPlatform->gDeferredPipeline->LoadMatrix(MMatrixType::PROJECTION, projection);
-			gPlatform->gAtomspherePipeline->LoadMatrix(MMatrixType::PROJECTION, projection);
-			gPlatform->gDeferredPipeline->LoadMatrix(MMatrixType::VIEW, view);
-			gPlatform->gAtomspherePipeline->LoadMatrix(MMatrixType::VIEW, view);
+			this->mTimeOfDay->Update();
+			this->mSunLight->Update(dt);
+			for (unsigned int i = 0; i < this->mActors.size(); i++) {
+				this->mActors[i]->Update(dt);
+			}
+			if (!this->mEditorModeFlag) {
+				if (gPlatform->GetKey(VK_ESCAPE) == 1) {
+					reinterpret_cast<MEditor*>(gPlatform)->ExitGame();
+				}
+				this->UpdatePhysics(dt);
+			}
+			if (this->gLocalCamera && !this->mEditorModeFlag) {
+				this->gLocalCamera->SubmitMousePosition(gPlatform->GetCursorPosX(), gPlatform->GetCursorPosY());
+				glm::mat4 projection = gLocalCamera->GetProjectionMatrix();
+				glm::mat4 view = gLocalCamera->GetViewMatrix();
+				gPlatform->gDeferredPipeline->SetCameraPosition(gLocalCamera->mPosition);
+				gPlatform->gForwardPipeline->SetCameraPosition(gLocalCamera->mPosition);
+
+				gPlatform->gDeferredPipeline->LoadMatrix(MMatrixType::PROJECTION, projection);
+				gPlatform->gForwardPipeline->LoadMatrix(MMatrixType::PROJECTION, projection);
+				gPlatform->gAtomspherePipeline->LoadMatrix(MMatrixType::PROJECTION, projection);
+
+				gPlatform->gDeferredPipeline->LoadMatrix(MMatrixType::VIEW, view);
+				gPlatform->gForwardPipeline->LoadMatrix(MMatrixType::VIEW, view);
+				gPlatform->gAtomspherePipeline->LoadMatrix(MMatrixType::VIEW, view);
+			}
+			else {
+				this->gEditorCamera->SubmitMousePosition(gPlatform->GetCursorPosX(), gPlatform->GetCursorPosY());
+				this->gEditorCamera->ProcessMovement();
+				glm::mat4 projection = this->gEditorCamera->GetProjectionMatrix();
+				glm::mat4 view = this->gEditorCamera->GetViewMatrix();
+				gPlatform->gDeferredPipeline->SetCameraPosition(this->gEditorCamera->position);
+				gPlatform->gForwardPipeline->SetCameraPosition(this->gEditorCamera->position);
+
+				gPlatform->gDeferredPipeline->LoadMatrix(MMatrixType::PROJECTION, projection);
+				gPlatform->gAtomspherePipeline->LoadMatrix(MMatrixType::PROJECTION, projection);
+				gPlatform->gForwardPipeline->LoadMatrix(MMatrixType::PROJECTION, projection);
+
+				gPlatform->gDeferredPipeline->LoadMatrix(MMatrixType::VIEW, view);
+				gPlatform->gAtomspherePipeline->LoadMatrix(MMatrixType::VIEW, view);
+				gPlatform->gForwardPipeline->LoadMatrix(MMatrixType::VIEW, view);
+			}
 		}
 		this->OnPreRender(dt);
 	}
 }
 
 void MScene::Render() {
-	glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LEQUAL);
-	gPlatform->gAtomspherePipeline->ClearBuffers();
-	gPlatform->gDeferredPipeline->ClearBuffers();
-	gPlatform->gDepthMappingPipeline->ClearBuffers();
 	if (this->mLoaded) {
-		this->mSunLight->Render();
-		for (unsigned int i = 0; i < this->mActors.size(); i++) {
-			this->mActors[i]->Render();
+		if (!this->mDummyFlag) {
+			gPlatform->gAtomspherePipeline->ClearBuffers();
+			gPlatform->gDepthMappingPipeline->ClearBuffers();
+			gPlatform->gDeferredPipeline->ClearBuffers();
+			gPlatform->gForwardPipeline->ClearBuffers();
+			gPlatform->gAtomspherePipeline->RenderQueueGeometryInstances();
+			gPlatform->gDepthMappingPipeline->RenderQueueGeometryInstances();
+			gPlatform->gDeferredPipeline->RenderQueueGeometryInstances();
+			gPlatform->gForwardPipeline->RenderQueueGeometryInstances();
+			gPlatform->gDeferredPipeline->ClearGeometryInstanceQueue();
+			gPlatform->gDepthMappingPipeline->ClearGeometryInstanceQueue();
+			gPlatform->gForwardPipeline->ClearGeometryInstanceQueue();
 		}
-		mAtmosphere->Render();
 	}
 }
 
@@ -148,27 +166,29 @@ void MScene::SaveSceneWithFullPath(const std::string& path) {
 	document.InsertEndChild(root);
 	//write information of actors to the scene file
 	for (auto i = 0u; i < mActors.size(); i++) {
-		if (mActors[i]->mClassName == "RigidStatic") {
+		if (mActors[i]->IsRigidStatic()) {
 			MRigidStatic* rs = reinterpret_cast<MRigidStatic*>(mActors[i]);
+			physx::PxVec3 p = rs->pActor->getGlobalPose().p;
+			physx::PxQuat q = rs->pActor->getGlobalPose().q.getNormalized();
 			tinyxml2::XMLElement* currentElement = document.NewElement("Actor");
 			currentElement->SetAttribute("class", "RigidStatic");
-			currentElement->SetAttribute("name", rs->name.c_str());
+			currentElement->SetAttribute("name", rs->mName.c_str());
 			currentElement->SetAttribute("model", rs->mModelPath.c_str());
 			currentElement->SetAttribute("material", rs->mMaterialPath.c_str());
-			currentElement->SetAttribute("position", GenStringByVec3(glm::vec3(rs->pActor->getGlobalPose().p.x, rs->pActor->getGlobalPose().p.y, rs->pActor->getGlobalPose().p.z)));
-			currentElement->SetAttribute("scale", GenStringByVec3(rs->scale));
-			currentElement->SetAttribute("rotate", GenStringByVec3(rs->rotate));
+			currentElement->SetAttribute("position", GenStringByVec3(glm::vec3(p.x, p.y, p.z)));
+			currentElement->SetAttribute("scale", GenStringByVec3(rs->mScale));
+			currentElement->SetAttribute("rotate", GenStringByVec4(glm::vec4(q.x, q.y, q.z, q.w)));
 			root->InsertEndChild(currentElement);
 		}
-		else if (mActors[i]->mClassName == "Entity") {
+		else if (mActors[i]->IsEntity()) {
 			MEntity* ent = reinterpret_cast<MEntity*>(mActors[i]);
 			tinyxml2::XMLElement* currentElement = document.NewElement("Actor");
 			currentElement->SetAttribute("class", "Entity");
-			currentElement->SetAttribute("name", ent->name.c_str());
+			currentElement->SetAttribute("name", ent->mName.c_str());
 			currentElement->SetAttribute("def", ent->mDefFilePath.c_str());
-			currentElement->SetAttribute("position", GenStringByVec3(ent->position));
-			currentElement->SetAttribute("scale", GenStringByVec3(ent->scale));
-			currentElement->SetAttribute("rotate", GenStringByVec3(ent->rotate));
+			currentElement->SetAttribute("position", GenStringByVec3(ent->mPosition));
+			currentElement->SetAttribute("scale", GenStringByVec3(ent->mScale));
+			currentElement->SetAttribute("rotate", GenStringByVec4(ent->mRotate));
 			root->InsertEndChild(currentElement);
 		}
 	}
@@ -231,82 +251,79 @@ void MScene::LoadScene() {
 
 	this->mLuaScriptPath = root->Attribute("script");
 	this->mName = root->Attribute("name");
+	this->mDummyFlag = root->BoolAttribute("dummy_flag");
 
-	std::string actorName, className;
+	if (!mDummyFlag) {
+		std::string actorName, className;
 
-	while (actorNode) {
-		actorName = actorNode->Attribute("name");
-		className = actorNode->Attribute("class");
+		while (actorNode) {
+			actorName = actorNode->Attribute("name");
+			className = actorNode->Attribute("class");
 
-		if (className == "Player") {
-			this->AddPlayer(actorName, actorNode);
-		}
-		else if (className == "RigidStatic") {
-			this->AddRigidStatic(actorName, actorNode);
-		}
-		else if (className == "PointLight") {
-			this->AddPointLight(actorName, actorNode);
-		}
-		else if (className == "DirectionLight") {
-			this->AddDirectionLight(actorName, actorNode);
-		}
-		else if (className == "SpotLight") {
-			this->AddSpotLight(actorName, actorNode);
-		}
-		else if (className == "Entity") {
-			this->AddEntity(actorName, actorNode);
-		}
-		else if (className == "Skybox") {
-			this->AddSkybox(actorName, actorNode);
-		}
-		else if (className == "Ragdoll") {
-			this->AddRagdoll(actorName, actorNode);
-		}
+			if (className == "RigidStatic") {
+				this->AddRigidStatic(actorName, actorNode);
+			}
+			else if (className == "PointLight") {
+				this->AddPointLight(actorName, actorNode);
+			}
+			else if (className == "DirectionLight") {
+				this->AddDirectionLight(actorName, actorNode);
+			}
+			else if (className == "SpotLight") {
+				this->AddSpotLight(actorName, actorNode);
+			}
+			else if (className == "Entity") {
+				this->AddEntity(actorName, actorNode);
+			}
+			else if (className == "Ragdoll") {
+				this->AddRagdoll(actorName, actorNode);
+			}
 #ifdef _DEBUG
-		std::cout << "Scene Loader " << actorName << " " << className << std::endl;
+			std::cout << "Scene Loader " << actorName << " " << className << std::endl;
 #endif // DEBUG
 
-		actorNode = actorNode->NextSiblingElement("Actor");
+			actorNode = actorNode->NextSiblingElement("Actor");
+		}
+
+		tinyxml2::XMLElement* todNode = root->FirstChildElement("TimeOfDay");
+		bool dynamic = todNode->BoolAttribute("dynamic");
+		double speed = todNode->DoubleAttribute("speed");
+		float xoffset = todNode->FloatAttribute("xoffset");
+		float iSun = todNode->FloatAttribute("iSun");
+		float rPlanet = todNode->FloatAttribute("rPlanet");
+		float rAtmos = todNode->FloatAttribute("rAtmos");
+		float kMie = todNode->FloatAttribute("kMie");
+		float shRlh = todNode->FloatAttribute("shRlh");
+		float shMie = todNode->FloatAttribute("shMie");
+		float g = todNode->FloatAttribute("g");
+		std::string skRlh = todNode->Attribute("kRlh");
+		float kRlhx{}, kRlhy{}, kRlhz{};
+		int n = GetVec3FromString(skRlh, &kRlhx, &kRlhy, &kRlhz);
+		assert(n == 3);
+
+		MAtmosphereParameters parameters;
+		parameters.g = g;
+		parameters.iSun = iSun;
+		parameters.rPlanet = rPlanet;
+		parameters.kMie = kMie;
+		parameters.rAtmos = rAtmos;
+		parameters.shMie = shMie;
+		parameters.shRlh = shRlh;
+		parameters.kRlh = glm::vec3(kRlhx, kRlhy, kRlhz);
+
+		mTimeOfDay = new MTimeOfDay(gPlatform, this, dynamic, speed, xoffset, parameters);
+		mSunLight = new MDirectionalLight(this, "Sun", "", glm::vec3(0.0f), glm::vec3(0.0f), true);
+		mSunLight->SetTimeOfDayObject(mTimeOfDay);
+
+		this->mEditorAgent = new MSceneEditorAgent(gPlatform, this);
+		this->gEditorCamera = new MFreeCamera(gPlatform, 5.0f);
+		//this->gLocalPlayer = reinterpret_cast<MEntity*>(this->mActorMap["LocalPlayer"]);
+		//this->gLocalCamera = reinterpret_cast<MCameraComponent*>(gLocalPlayer->componentMap["DefaultCamera"]);
+		//assert(this->mActorMap["LocalPlayer"] && gLocalPlayer->componentMap["DefaultCamera"]);
+
+		mAtmosphere = new MAtmosphere(this, "Atmosphere");
+		mAtmosphere->SetTimeOfDayObject(mTimeOfDay);
 	}
-
-	tinyxml2::XMLElement* todNode = root->FirstChildElement("TimeOfDay");
-	bool dynamic = todNode->BoolAttribute("dynamic");
-	double speed = todNode->DoubleAttribute("speed");
-	float xoffset = todNode->FloatAttribute("xoffset");
-	float iSun = todNode->FloatAttribute("iSun");
-	float rPlanet = todNode->FloatAttribute("rPlanet");
-	float rAtmos = todNode->FloatAttribute("rAtmos");
-	float kMie = todNode->FloatAttribute("kMie");
-	float shRlh = todNode->FloatAttribute("shRlh");
-	float shMie = todNode->FloatAttribute("shMie");
-	float g = todNode->FloatAttribute("g");
-	std::string skRlh = todNode->Attribute("kRlh");
-	float kRlhx{}, kRlhy{}, kRlhz{};
-	int n = GetVec3FromString(skRlh, &kRlhx, &kRlhy, &kRlhz);
-	assert(n == 3);
-
-	MAtmosphereParameters parameters;
-	parameters.g = g;
-	parameters.iSun = iSun;
-	parameters.rPlanet = rPlanet;
-	parameters.kMie = kMie;
-	parameters.rAtmos = rAtmos;
-	parameters.shMie = shMie;
-	parameters.shRlh = shRlh;
-	parameters.kRlh = glm::vec3(kRlhx, kRlhy, kRlhz);
-
-	mTimeOfDay = new MTimeOfDay(gPlatform, this, dynamic, speed, xoffset, parameters);
-	mSunLight = new MDirectionalLight(this, "Sun", "", glm::vec3(0.0f), glm::vec3(0.0f), true);
-	mSunLight->SetTimeOfDayObject(mTimeOfDay);
-
-	this->mEditorAgent = new MSceneEditorAgent(gPlatform, this);
-	this->gEditorCamera = new MFreeCamera(gPlatform, 5.0f);
-	//this->gLocalPlayer = reinterpret_cast<MEntity*>(this->mActorMap["LocalPlayer"]);
-	//this->gLocalCamera = reinterpret_cast<MCameraComponent*>(gLocalPlayer->componentMap["DefaultCamera"]);
-	//assert(this->mActorMap["LocalPlayer"] && gLocalPlayer->componentMap["DefaultCamera"]);
-
-	mAtmosphere = new MAtmosphere(this, "Atmosphere");
-	mAtmosphere->SetTimeOfDayObject(mTimeOfDay);
 
 	this->InitializeLuaInstance();
 	if (!mEditorModeFlag) {
@@ -314,19 +331,6 @@ void MScene::LoadScene() {
 	}
 
 	this->mLoaded = true;
-}
-
-void MScene::AddPlayer(const std::string& name, tinyxml2::XMLElement* node) {
-	std::string mDefFilePath = node->Attribute("def");
-	std::string initialPosStr = node->Attribute("position");
-
-	float pos_x = 0.0f, pos_y = 0.0f, pos_z = 0.0f;
-	int num = GetVec3FromString(initialPosStr, &pos_x, &pos_y, &pos_z);
-	assert(num == 3);
-
-	MPlayer* object = new MPlayer(this, name, mDefFilePath, glm::vec3(pos_x, pos_y, pos_z));
-	this->mActors.push_back(object);
-	this->mActorMap[name] = object;
 }
 
 void MScene::AddRigidStatic(const std::string& name, tinyxml2::XMLElement* node) {
@@ -342,14 +346,14 @@ void MScene::AddRigidStatic(const std::string& name, tinyxml2::XMLElement* node)
 	float scale_x = 0.0f, scale_y = 0.0f, scale_z = 0.0f;
 	num = GetVec3FromString(scaleStr, &scale_x, &scale_y, &scale_z);
 	assert(num == 3);
-	float rotate_x = 0.0f, rotate_y = 0.0f, rotate_z = 0.0f;
-	num = GetVec3FromString(rotateStr, &rotate_x, &rotate_y, &rotate_z);
-	assert(num == 3);
+	float rotate_w = 0.0f, rotate_x = 0.0f, rotate_y = 0.0f, rotate_z = 0.0f;
+	num = GetVec4FromString(rotateStr, &rotate_x, &rotate_y, &rotate_z, &rotate_w);
+	assert(num == 4);
 
 	MRigidStatic* object = new MRigidStatic(this, name, modelPath, materialPath,
 		glm::vec3(pos_x, pos_y, pos_z), 
 		glm::vec3(scale_x, scale_y, scale_z), 
-		glm::vec3(rotate_x, rotate_y, rotate_z));
+		glm::vec4(rotate_x, rotate_y, rotate_z, rotate_w));
 	this->mActors.push_back(object);
 	this->mActorMap[name] = object;
 }
@@ -421,30 +425,17 @@ void MScene::AddEntity(const std::string& name, tinyxml2::XMLElement* node) {
 	float scale_x = 0.0f, scale_y = 0.0f, scale_z = 0.0f;
 	num = GetVec3FromString(scaleStr, &scale_x, &scale_y, &scale_z);
 	assert(num == 3);
-	float rotate_x = 0.0f, rotate_y = 0.0f, rotate_z = 0.0f;
-	num = GetVec3FromString(rotateStr, &rotate_x, &rotate_y, &rotate_z);
-	assert(num == 3);
+	float rotate_w = 0.0f, rotate_x = 0.0f, rotate_y = 0.0f, rotate_z = 0.0f;
+	num = GetVec4FromString(rotateStr, &rotate_w, &rotate_x, &rotate_y, &rotate_z);
+	assert(num == 4);
 	//
 	MEntity* object = new MEntity(this, name, mDefFilePath, "",
 		glm::vec3(pos_x, pos_y, pos_z),
 		glm::vec3(scale_x, scale_y, scale_z),
-		glm::vec3(rotate_x, rotate_y, rotate_z));
+		glm::vec4(rotate_w, rotate_x, rotate_y, rotate_z));
 	this->mActors.push_back(object);
 	this->mActorMap[name] = object;
 	gPlatform->gLuaState->set(name, object);
-}
-
-void MScene::AddSkybox(const std::string& name, tinyxml2::XMLElement* node) {
-	std::string right = node->Attribute("right");
-	std::string left = node->Attribute("left");
-	std::string top = node->Attribute("top");
-	std::string bottom = node->Attribute("bottom");
-	std::string back = node->Attribute("back");
-	std::string front = node->Attribute("front");
-
-	MSkybox* object = new MSkybox(this, name, top, bottom, front, back, left, right);
-	this->mActors.push_back(object);
-	this->mActorMap[name] = object;
 }
 
 void MScene::AddCharacterController(const std::string& name, tinyxml2::XMLElement* root)
@@ -497,21 +488,11 @@ unsigned int MScene::GetSpotLightID() {
 	return this->currentSpotLightID++;
 }
 
-void MScene::RenderForDepthMapping() {
-	if (this->mLoaded) {
-		gPlatform->gDepthMappingPipeline->BeginRendering();
-		for (unsigned int i = 0; i < this->mActors.size(); i++) {
-			this->mActors[i]->RenderForDepthMapping();
-		}
-		gPlatform->gDepthMappingPipeline->EndRendering();
-	}
-}
-
 void MScene::SpawnEntity(const std::string& name, const std::string& def) {
 	MEntity* object = new MEntity(this, name, def, "",
 		gLocalCamera->mPosition + glm::vec3(0.0f, 5.0f, 0.0f),
 		glm::vec3(1.0f, 1.0f, 1.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f));
+		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	this->mActors.push_back(object);
 	this->mActorMap[name] = object;
 	gPlatform->gLuaState->set(name, object);
@@ -521,7 +502,7 @@ void MScene::SpawnEntityEx(const std::string& name, const std::string& def, doub
 	MEntity* object = new MEntity(this, name, def, "",
 		glm::vec3(xpos, ypos, zpos),
 		glm::vec3(1.0f, 1.0f, 1.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f));
+		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	this->mActors.push_back(object);
 	this->mActorMap[name] = object;
 	gPlatform->gLuaState->set(name, object);

@@ -56,9 +56,10 @@ void MMaterial::LoadMaterial(const std::string& path) {
 		while (subMaterialNode) {
 			std::string albedoPath, normalPath,
 				roughnessPath, metallicPath, AOPath,
+				opacityPath,
 				albedoColorStr;
 			glm::vec3 albedoColor(0.0f);
-			float metallicColor, roughnessColor, aoColor;
+			float metallicColor, roughnessColor, aoColor, opacityColor;
 
 			bool useColor = subMaterialNode->BoolAttribute("use_color");
 			bool useForward = subMaterialNode->IntAttribute("forward_pipeline");
@@ -68,19 +69,19 @@ void MMaterial::LoadMaterial(const std::string& path) {
 			std::string surfaceType = subMaterialNode->Attribute("surface_type");
 			int surfaceTypeID = 0;
 
-			if (surfaceType == "Metal") {
+			if (surfaceType == "metal") {
 				surfaceTypeID = M3D_SURFACE_TYPE_METAL;
 			}
-			else if (surfaceType == "Stone") {
+			else if (surfaceType == "stone") {
 				surfaceTypeID = M3D_SURFACE_TYPE_STONE;
 			}
-			else if (surfaceType == "Mud") {
+			else if (surfaceType == "mud") {
 				surfaceTypeID = M3D_SURFACE_TYPE_MUD;
 			}
-			else if (surfaceType == "Wood") {
+			else if (surfaceType == "wood") {
 				surfaceTypeID = M3D_SURFACE_TYPE_WOOD;
 			}
-			else if (surfaceType == "Plastic") {
+			else if (surfaceType == "plastic") {
 				surfaceTypeID = M3D_SURFACE_TYPE_PLASTIC;
 			}
 
@@ -122,24 +123,49 @@ void MMaterial::LoadMaterial(const std::string& path) {
 						aoColor = textureNode->FloatAttribute("color");
 					}
 				}
+				else if (type == "texture_opacity") {
+					opacityPath = path;
+					if (useColor) {
+						opacityColor = textureNode->FloatAttribute("color");
+					}
+				}
 
 				textureNode = textureNode->NextSiblingElement();
 			}
 
 			if (!useColor) {
-				MSubMaterial* subMaterial = new MSubMaterial(gPlatform, this, index,
-					useForward, surfaceTypeID, albedoPath, normalPath,
-					roughnessPath, metallicPath, AOPath);
-				assert(subMaterial);
-				mSubMaterialTable[index] = subMaterial;
+				if (!useForward) {
+					MSubMaterial* subMaterial = new MSubMaterial(gPlatform, this, index,
+						useForward, surfaceTypeID, albedoPath, normalPath,
+						roughnessPath, metallicPath, AOPath);
+					assert(subMaterial);
+					mSubMaterialTable[index] = subMaterial;
+				}
+				else {
+					MSubMaterial* subMaterial = new MSubMaterial(gPlatform, this, index,
+						useForward, surfaceTypeID, albedoPath, normalPath,
+						roughnessPath, metallicPath, AOPath, opacityPath);
+					assert(subMaterial);
+					mSubMaterialTable[index] = subMaterial;
+				}
 			}
 			else {
-				MSubMaterial* subMaterial = new MSubMaterial(gPlatform, this, index,
-					useForward, surfaceTypeID, albedoPath, normalPath,
-					roughnessPath, metallicPath, AOPath, albedoColor,
-					metallicColor, roughnessColor, aoColor);
-				assert(subMaterial);
-				mSubMaterialTable[index] = subMaterial;
+				if (!useForward) {
+					MSubMaterial* subMaterial = new MSubMaterial(gPlatform, this, index,
+						useForward, surfaceTypeID, albedoPath, normalPath,
+						roughnessPath, metallicPath, AOPath, albedoColor,
+						metallicColor, roughnessColor, aoColor);
+					assert(subMaterial);
+					mSubMaterialTable[index] = subMaterial;
+				}
+				else {
+					MSubMaterial* subMaterial = new MSubMaterial(gPlatform, this, index,
+						useForward, surfaceTypeID, albedoPath, normalPath,
+						roughnessPath, metallicPath, AOPath, opacityPath, albedoColor,
+						metallicColor, roughnessColor, aoColor, opacityColor);
+					assert(subMaterial);
+					mSubMaterialTable[index] = subMaterial;
+				}
 			}
 
 			subMaterialNode = subMaterialNode->NextSiblingElement();
@@ -186,17 +212,34 @@ MSubMaterial::MSubMaterial(MBasicPlatform* platform, MMaterial* parent, const un
 	LoadTextures(albedoPath, normalPath, roughnessPath, metallicPath, AOPath);
 }
 
+MSubMaterial::MSubMaterial(MBasicPlatform* platform, MMaterial* parent, const unsigned int ID, const bool useForward, int surfaceTypeID, const std::string& albedoPath, const std::string& normalPath, const std::string& roughnessPath, const std::string& metallicPath, const std::string& AOPath, const std::string& opacityPath) {
+	gPlatform = platform;
+	mParent = parent;
+	mUseForwardPipeline = useForward;
+	mSurfaceTypeID = surfaceTypeID;
+	LoadTextures(albedoPath, normalPath, roughnessPath, metallicPath, AOPath, opacityPath);
+}
+
+MSubMaterial::MSubMaterial(MBasicPlatform* platform, MMaterial* parent, const unsigned int ID, const bool useForward, int surfaceTypeID, const std::string& albedoPath, const std::string& normalPath, const std::string& roughnessPath, const std::string& metallicPath, const std::string& AOPath, const std::string& opaacityPath, const glm::vec3& albedoColor, const float metallicColor, const float roughnessColor, const float aoColor, const float opacityColor) {
+	gPlatform = platform;
+	mParent = parent;
+	mUseForwardPipeline = useForward;
+	mSurfaceTypeID = surfaceTypeID;
+	mAlbedoColor = albedoColor;
+	mMetallicColor = metallicColor;
+	mRoughnessColor = roughnessColor;
+	mAOColor = aoColor;
+	mOpacityColor = opacityColor;
+	mUseDefaultNormal = true;
+	LoadTextures(albedoPath, normalPath, roughnessPath, metallicPath, AOPath);
+}
+
 MSubMaterial::~MSubMaterial()
 {
 }
 
 void MSubMaterial::LoadTextures(const std::string& albedoPath, const std::string& normalPath, const std::string& roughnessPath, const std::string& metallicPath, const std::string& AOPath) {
 	MTexture* textures[5] = { NULL };
-	//textures[0] = new MTexture(true, gPlatform->gAssetManager, GenerateGuidA(), "texture_albedo", albedoPath);
-	//textures[1] = new MTexture(true, gPlatform->gAssetManager, GenerateGuidA(), "texture_normal", normalPath);
-	//textures[2] = new MTexture(true, gPlatform->gAssetManager, GenerateGuidA(), "texture_metallic", metallicPath);
-	//textures[3] = new MTexture(true, gPlatform->gAssetManager, GenerateGuidA(), "texture_roughness", roughnessPath);
-	//textures[4] = new MTexture(true, gPlatform->gAssetManager, GenerateGuidA(), "texture_AO", AOPath);
 	textures[0] = gPlatform->gAssetManager->AddTexture(true, "texture_albedo", albedoPath, (char*)GenerateGuidA());
 	textures[1] = gPlatform->gAssetManager->AddTexture(true, "texture_normal", normalPath, (char*)GenerateGuidA());
 	textures[2] = gPlatform->gAssetManager->AddTexture(true, "texture_metallic", metallicPath, (char*)GenerateGuidA());
@@ -207,9 +250,34 @@ void MSubMaterial::LoadTextures(const std::string& albedoPath, const std::string
 	}
 }
 
+void MSubMaterial::LoadTextures(const std::string& albedoPath, const std::string& normalPath, const std::string& roughnessPath, const std::string& metallicPath, const std::string& AOPath, const std::string& opacityPath) {
+	MTexture* textures[6] = { NULL };
+	textures[0] = gPlatform->gAssetManager->AddTexture(true, "texture_albedo", albedoPath, (char*)GenerateGuidA());
+	textures[1] = gPlatform->gAssetManager->AddTexture(true, "texture_normal", normalPath, (char*)GenerateGuidA());
+	textures[2] = gPlatform->gAssetManager->AddTexture(true, "texture_metallic", metallicPath, (char*)GenerateGuidA());
+	textures[3] = gPlatform->gAssetManager->AddTexture(true, "texture_roughness", roughnessPath, (char*)GenerateGuidA());
+	textures[4] = gPlatform->gAssetManager->AddTexture(true, "texture_AO", AOPath, (char*)GenerateGuidA());
+	textures[5] = gPlatform->gAssetManager->AddTexture(true, "texture_opacity", opacityPath, (char*)GenerateGuidA());
+	for (int i = 0; i < 6; i++) {
+		mTextures.push_back(textures[i]);
+	}
+}
+
 void MSubMaterial::Assign() {
-	if (!mUseForwardPipeline) {
-		gPlatform->gDeferredPipeline->BeginRendering();
+	if (mUseForwardPipeline) {
+		gPlatform->gForwardPipeline->SetTransparentLightingShaderVec3("albedo_color", mAlbedoColor);
+		gPlatform->gForwardPipeline->SetTransparentLightingShaderFloat("metallic_color", mMetallicColor);
+		gPlatform->gForwardPipeline->SetTransparentLightingShaderFloat("roughness_color", mRoughnessColor);
+		gPlatform->gForwardPipeline->SetTransparentLightingShaderFloat("ao_color", mAOColor);
+		gPlatform->gForwardPipeline->SetTransparentLightingShaderFloat("opacity_color", mOpacityColor);
+		if (mUseDefaultNormal) {
+			gPlatform->gForwardPipeline->SetTransparentLightingShaderInteger("use_default_norm", 1);
+		}
+		else {
+			gPlatform->gForwardPipeline->SetTransparentLightingShaderInteger("use_default_norm", 0);
+		}
+	}
+	else {
 		gPlatform->gDeferredPipeline->SetGeometryPassVec3("albedo_color", mAlbedoColor);
 		gPlatform->gDeferredPipeline->SetGeometryPassFloat("metallic_color", mMetallicColor);
 		gPlatform->gDeferredPipeline->SetGeometryPassFloat("roughness_color", mRoughnessColor);
@@ -220,14 +288,11 @@ void MSubMaterial::Assign() {
 		else {
 			gPlatform->gDeferredPipeline->SetGeometryPassInteger("use_default_norm", 0);
 		}
-		for (unsigned int i = 0; i < mTextures.size(); i++) {
-			glActiveTexture(GL_TEXTURE0 + i);
-			gPlatform->gDeferredPipeline->SetGeometryPassInteger(mTextures[i]->GetType(), i);
-			glBindTexture(GL_TEXTURE_2D, mTextures[i]->GetTextureID());
-		}
 	}
-	else {
-		//gPlatform->gAtomspherePipeline->BeginRendering();
+	for (unsigned int i = 0; i < mTextures.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		gPlatform->gDeferredPipeline->SetGeometryPassInteger(mTextures[i]->GetType(), i);
+		glBindTexture(GL_TEXTURE_2D, mTextures[i]->GetTextureID());
 	}
 }
 
@@ -235,11 +300,5 @@ void MSubMaterial::Unassign() {
 	for (unsigned int i = 0; i < mTextures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-	if (!mUseForwardPipeline) {
-		gPlatform->gDeferredPipeline->EndRendering();
-	}
-	else {
-		//gPlatform->gAtomspherePipeline->EndRendering();
 	}
 }
