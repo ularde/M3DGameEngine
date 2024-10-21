@@ -126,10 +126,10 @@ protected:
 	void LoadGlobalConfig();
 };
 
-class MOfflineGame :public MBasicPlatform {
+class MGame :public MBasicPlatform {
 public:
-	MOfflineGame(unsigned int OS);
-	~MOfflineGame();
+	MGame(unsigned int OS);
+	~MGame();
 	int GetWindowWidth() { return this->gFramebufferWidth; }
 	int GetWindowHeight() { return this->gFramebufferHeight; }
 	double GetTime() { return glfwGetTime(); }

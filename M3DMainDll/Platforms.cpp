@@ -85,7 +85,7 @@ static void mclose_gl(void) {
 	}
 }
 
-MOfflineGame::MOfflineGame(unsigned int OS) {
+MGame::MGame(unsigned int OS) {
 	gType = MPlatformType::GAME;
 	this->gLuaState = new sol::state();
 	this->gLuaState->open_libraries(sol::lib::base);
@@ -130,12 +130,15 @@ MOfflineGame::MOfflineGame(unsigned int OS) {
 	}
 	
 	glfwInit();
+
+	const GLFWvidmode* vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	
 	if (!gGalliumFlag) {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		this->gWindow = glfwCreateWindow(this->gFramebufferWidth, this->gFramebufferHeight, windowTitle.c_str(), NULL, NULL);
+		glfwSetWindowPos(this->gWindow, vidmode->width >> 3, vidmode->height >> 3);
 
 		glfwMakeContextCurrent(this->gWindow);
 		glfwSwapInterval(-1);
@@ -151,6 +154,7 @@ MOfflineGame::MOfflineGame(unsigned int OS) {
 		if (InitializeMesa3D()) {
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			this->gWindow = glfwCreateWindow(this->gFramebufferWidth, this->gFramebufferHeight, windowTitle.c_str(), NULL, NULL);
+			glfwSetWindowPos(this->gWindow, vidmode->width >> 3, vidmode->height >> 3);
 
 			HWND hWnd = glfwGetWin32Window(this->gWindow);
 			HDC dc = GetDC(hWnd);
@@ -233,7 +237,7 @@ MOfflineGame::MOfflineGame(unsigned int OS) {
 }
 
 
-MOfflineGame::~MOfflineGame() {
+MGame::~MGame() {
 	(*gLuaState)["Main_OnDestroy"]();
 
 	delete[]this->gAssetManager;
@@ -247,7 +251,7 @@ MOfflineGame::~MOfflineGame() {
 	glfwTerminate();
 }
 
-int MOfflineGame::GetKey(int key) {
+int MGame::GetKey(int key) {
 	if (gGameConsole->GetConsoleVisibility()) {
 		return -1;
 	}
@@ -256,7 +260,7 @@ int MOfflineGame::GetKey(int key) {
 	}
 }
 
-int MOfflineGame::GetKeyInGameConsole(int key) {
+int MGame::GetKeyInGameConsole(int key) {
 	if (gGameConsole->GetConsoleVisibility()) {
 		return glfwGetKey(this->gWindow, key);
 	}
@@ -265,12 +269,14 @@ int MOfflineGame::GetKeyInGameConsole(int key) {
 	}
 }
 
-void MOfflineGame::Update() {
+void MGame::Update() {
+	static bool fullscreenIntit = false;
 	this->currentFrameTime = glfwGetTime();
 	this->deltaTime = this->currentFrameTime - this->lastFrameTime;
 	this->lastFrameTime = this->currentFrameTime;
 
-	if (this->gFullscreenFlag) {
+	if (this->gFullscreenFlag && !fullscreenIntit) {
+		fullscreenIntit = true;
 		const GLFWvidmode* vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 		glfwSetWindowSize(this->gWindow, vidmode->width, vidmode->height);
 		glfwSetWindowMonitor(this->gWindow, glfwGetPrimaryMonitor(), 0, 0, vidmode->width, vidmode->height, GLFW_DONT_CARE);
@@ -324,11 +330,11 @@ void MOfflineGame::Update() {
 	glfwPollEvents();
 }
 
-void MOfflineGame::ConsoleWriteLine(float r, float g, float b, const std::string& text) {
+void MGame::ConsoleWriteLine(float r, float g, float b, const std::string& text) {
 	this->gGameConsole->WriteLine(r, g, b, text);
 }
 
-bool MOfflineGame::GetMouseLeftButtonDown() {
+bool MGame::GetMouseLeftButtonDown() {
 	int n = glfwGetMouseButton(this->gWindow, GLFW_MOUSE_BUTTON_LEFT);
 	switch (n)
 	{
@@ -344,7 +350,7 @@ bool MOfflineGame::GetMouseLeftButtonDown() {
 	return false;
 }
 
-bool MOfflineGame::GetMouseRightButtonDown() {
+bool MGame::GetMouseRightButtonDown() {
 	int n = glfwGetMouseButton(this->gWindow, GLFW_MOUSE_BUTTON_RIGHT);
 	switch (n)
 	{
@@ -360,7 +366,7 @@ bool MOfflineGame::GetMouseRightButtonDown() {
 	return false;
 }
 
-bool MOfflineGame::GetMouseLeftButtonUp() {
+bool MGame::GetMouseLeftButtonUp() {
 	int n = glfwGetMouseButton(this->gWindow, GLFW_MOUSE_BUTTON_LEFT);
 	switch (n)
 	{
@@ -376,7 +382,7 @@ bool MOfflineGame::GetMouseLeftButtonUp() {
 	return true;
 }
 
-bool MOfflineGame::GetMouseRightButtonUp() {
+bool MGame::GetMouseRightButtonUp() {
 	int n = glfwGetMouseButton(this->gWindow, GLFW_MOUSE_BUTTON_RIGHT);
 	switch (n)
 	{
@@ -392,15 +398,15 @@ bool MOfflineGame::GetMouseRightButtonUp() {
 	return true;
 }
 
-void MOfflineGame::CharCallback(unsigned int codepoint) {
+void MGame::CharCallback(unsigned int codepoint) {
 	this->gGameConsole->CaptureTextInput(codepoint);
 }
 
-void MOfflineGame::KeyCallback(int key, int scancode, int action, int mods) {
+void MGame::KeyCallback(int key, int scancode, int action, int mods) {
 	this->gGameConsole->CaptureControlKeyInput(key, scancode, action, mods);
 }
 
-void MOfflineGame::FramebufferSizeCallback(int width, int height) {
+void MGame::FramebufferSizeCallback(int width, int height) {
 	gFramebufferWidth = width;
 	gFramebufferHeight = height;
 	switch (gAtmosphereQuality)
@@ -425,54 +431,54 @@ void MOfflineGame::FramebufferSizeCallback(int width, int height) {
 	gAtomspherePipeline->UpdateFramebufferSize();
 }
 
-void MOfflineGame::CursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+void MGame::CursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
 	if (this->gCurrentContainer) {
 		this->gCurrentContainer->MouseCallback(window, xpos, ypos);
 	}
 }
 
-void MOfflineGame::ScrollCallback(double xoffset, double yoffset) {
+void MGame::ScrollCallback(double xoffset, double yoffset) {
 	mScrollOffsetX = xoffset;
 	mScrollOffsetY = yoffset;
 }
 
-void MOfflineGame::SetCursorInvisible() {
+void MGame::SetCursorInvisible() {
 	mCursorDisabled = true;
 	glfwSetInputMode(this->gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
-void MOfflineGame::SetCursorVisible() {
+void MGame::SetCursorVisible() {
 	mCursorDisabled = false;
 	glfwSetInputMode(this->gWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 
 void OfflineGame_CharCallback(GLFWwindow* window, unsigned int codepoint) {
-	MOfflineGame* instance = reinterpret_cast<MOfflineGame*>(glfwGetWindowUserPointer(window));
+	MGame* instance = reinterpret_cast<MGame*>(glfwGetWindowUserPointer(window));
 	instance->CharCallback(codepoint);
 }
 
 void OfflineGame_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	MOfflineGame* instance = reinterpret_cast<MOfflineGame*>(glfwGetWindowUserPointer(window));
+	MGame* instance = reinterpret_cast<MGame*>(glfwGetWindowUserPointer(window));
 	instance->KeyCallback(key, scancode, action, mods);
 }
 
 void OfflineGame_FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
-	MOfflineGame* instance = reinterpret_cast<MOfflineGame*>(glfwGetWindowUserPointer(window));
+	MGame* instance = reinterpret_cast<MGame*>(glfwGetWindowUserPointer(window));
 	instance->FramebufferSizeCallback(width, height);
 }
 
 void OfflineGame_CursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
-	MOfflineGame* instance = reinterpret_cast<MOfflineGame*>(glfwGetWindowUserPointer(window));
+	MGame* instance = reinterpret_cast<MGame*>(glfwGetWindowUserPointer(window));
 	instance->CursorPosCallback(window, xpos, ypos);
 }
 
 void OfflineGame_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-	MOfflineGame* instance = reinterpret_cast<MOfflineGame*>(glfwGetWindowUserPointer(window));
+	MGame* instance = reinterpret_cast<MGame*>(glfwGetWindowUserPointer(window));
 	instance->ScrollCallback(xoffset, yoffset);
 }
 
-void MOfflineGame::SplashScreen() {
+void MGame::SplashScreen() {
 	/*
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);

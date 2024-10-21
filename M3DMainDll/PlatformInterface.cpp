@@ -16,7 +16,7 @@ M3DMainInterface* PICreateMainInterface(unsigned int gPlatform) {
     mainInterfaceObject->currentStatue = M3D_Interface_Operating;
     switch (gPlatform) {
     case M3D_WinClient:
-        instance = new MOfflineGame(M3D_Windows);
+        instance = new MGame(M3D_Windows);
         break;
     case M3D_WinServer:
         //
@@ -25,7 +25,7 @@ M3DMainInterface* PICreateMainInterface(unsigned int gPlatform) {
         instance = new MEditor(M3D_Windows);
         break;
     case M3D_LinuxClient:
-        instance = new MOfflineGame(M3D_Linux);
+        instance = new MGame(M3D_Linux);
         break;
     case M3D_LinuxEditor:
         instance = new MEditor(M3D_Linux);
