@@ -7,7 +7,7 @@
 #include <assimp/scene.h>
 
 #include "AssetManager.h"
-#include "Mesh.h"
+#include "TriangleMesh.h"
 #include "Global.h"
 #include "Class.h"
 
@@ -28,7 +28,7 @@ public:
 	bool GetUseCustomMaterialFlag() { return mUseCustomMaterial; }
 	void PushUseCustomMaterialFlag() { mUseCustomMaterialStack = mUseCustomMaterial; }
 	void PopUseCustomMaterialFlag() { mUseCustomMaterial = mUseCustomMaterialStack; }
-	void CommitGeometryInstances();
+	void CommitRenderInstances();
 	void RenderForDepthMapping();
 	void ProcessNode(aiNode* node);
 	void LoadModel();

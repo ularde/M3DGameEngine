@@ -2,25 +2,25 @@
 #include <glm/glm.hpp>
 #include "RenderPipeline.h"
 #include "RenderForwardSubPipeline.h"
-#include "GeometryInstance.h"
+#include "RenderInstance.h"
 
 class MRenderPipeline;
 class MShaderProgram;
 class MBasicPlatform;
 class MRenderForwardPipeline;
-struct MGeometryInstance;
+struct MRenderInstance;
 
 class MRenderDeferredPipeline :public MRenderPipeline {
 public:
 	MRenderDeferredPipeline(MBasicPlatform* gPlatform);
 	~MRenderDeferredPipeline();
 	virtual void UpdateFramebufferSize()override;
-	virtual void RenderQueueGeometryInstances()override;
+	virtual void RenderQueueInstances()override;
 	virtual void SendMatricesToShader()override;
 	virtual void DisableColorMask()override;
 	virtual void EnableColorMask()override;
-	void AddGeometryInstanceToQueue(MGeometryInstance mesh);
-	void ClearGeometryInstanceQueue();
+	void AddRenderInstanceToQueue(MRenderInstance mesh);
+	void ClearRenderInstanceQueue();
 	void CopyForwardDepthBufferToDeferredDepthBuffer();
 	void ClearBuffers();
 	void SetLightingPassSamplerUnit(const std::string& name, const int unit);
@@ -33,6 +33,7 @@ public:
 	void SetLightingPassVec3(const std::string& name, const glm::vec3& vec);
 	void SetDirectionalLight(const glm::vec3& dir, const glm::vec3& color);
 	unsigned int GetDepthBuffer() { return gDepthBuffer; }
+	unsigned int GetLightingResultChannel() { return gLightingResultChannel; }
 	//void SetSpotLight();
 	//void SetPointLight();
 	void DoLightingPass();
@@ -54,7 +55,7 @@ protected:
 	GLuint gNormalChannel = 0;
 	GLuint gMRAChannel = 0;
 	GLuint gDepthBuffer = 0;
-	std::vector<MGeometryInstance> gGeometryInstanceQueue;
+	std::vector<MRenderInstance> gRenderInstanceQueue;
 	//SSAO
 	void InitializeIndirectLighting();
 	GLuint gNoiseTex = 0;

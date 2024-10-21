@@ -93,7 +93,7 @@ void MRenderAtomspherePipeline::UpdateFramebufferSize() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void MRenderAtomspherePipeline::RenderQueueGeometryInstances() {
+void MRenderAtomspherePipeline::RenderQueueInstances() {
 	glBindFramebuffer(GL_FRAMEBUFFER, mAtomsphereFrambuffer);
 	glViewport(0, 0, gPlatform->gAtmosphereFramebufferWidth, gPlatform->gAtmosphereFramebufferHeight);
 	if (gCurrentAtomsphereShader) {

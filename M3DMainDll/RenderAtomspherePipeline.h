@@ -15,7 +15,7 @@ public:
 	void ClearBuffers();
 	MShaderProgram* GetCurrentAtomsphereShader() { return gCurrentAtomsphereShader; }
 	virtual void UpdateFramebufferSize()override;
-	virtual void RenderQueueGeometryInstances()override;
+	virtual void RenderQueueInstances()override;
 	virtual void SendMatricesToShader()override;
 	virtual void DisableColorMask()override;
 	virtual void EnableColorMask()override;

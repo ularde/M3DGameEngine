@@ -189,7 +189,7 @@ void MRenderDeferredPipeline::UpdateFramebufferSize() {
 		glm::vec2(gPlatform->gFramebufferWidth, gPlatform->gFramebufferHeight));
 }
 
-void MRenderDeferredPipeline::RenderQueueGeometryInstances() {
+void MRenderDeferredPipeline::RenderQueueInstances() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glDepthMask(GL_TRUE);
@@ -198,10 +198,10 @@ void MRenderDeferredPipeline::RenderQueueGeometryInstances() {
 	glBindFramebuffer(GL_FRAMEBUFFER, gGeomBuffer);
 	mGeometryPassShader->UniformVec3("camPos", gCamPos);
 	mGeometryPassShader->Use();
-	for (auto i = 0u; i < gGeometryInstanceQueue.size(); i++) {
-		if (gGeometryInstanceQueue[i].mOwner->IsRigidStatic()) {
-			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gGeometryInstanceQueue[i].mShape);
-			MRigidStatic* rs = reinterpret_cast<MRigidStatic*>(gGeometryInstanceQueue[i].mOwner);
+	for (auto i = 0u; i < gRenderInstanceQueue.size(); i++) {
+		if (gRenderInstanceQueue[i].mOwner->IsRigidStatic()) {
+			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gRenderInstanceQueue[i].mShape);
+			MRigidStatic* rs = reinterpret_cast<MRigidStatic*>(gRenderInstanceQueue[i].mOwner);
 
 			LoadMatrix(MMatrixType::MODEL, rs->mModelMatrix);
 			rs->mModel->PushUseCustomMaterialFlag();
@@ -220,9 +220,9 @@ void MRenderDeferredPipeline::RenderQueueGeometryInstances() {
 
 			rs->mModel->PopUseCustomMaterialFlag();
 		}
-		else if (gGeometryInstanceQueue[i].mOwner->mClassName == "StaticMeshComponent") {
-			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gGeometryInstanceQueue[i].mShape);
-			MStaticMeshComponent* mc = reinterpret_cast<MStaticMeshComponent*>(gGeometryInstanceQueue[i].mOwner);
+		else if (gRenderInstanceQueue[i].mOwner->mClassName == "StaticMeshComponent") {
+			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gRenderInstanceQueue[i].mShape);
+			MStaticMeshComponent* mc = reinterpret_cast<MStaticMeshComponent*>(gRenderInstanceQueue[i].mOwner);
 
 			if (mc->mPhysicsProxy) {
 				LoadMatrix(MMatrixType::MODEL, mc->mPhysicsProxy->GetModelMatrix());
@@ -262,13 +262,13 @@ void MRenderDeferredPipeline::EnableColorMask() {
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
-void MRenderDeferredPipeline::AddGeometryInstanceToQueue(MGeometryInstance mesh) {
-	gGeometryInstanceQueue.push_back(mesh);
+void MRenderDeferredPipeline::AddRenderInstanceToQueue(MRenderInstance mesh) {
+	gRenderInstanceQueue.push_back(mesh);
 }
 
-void MRenderDeferredPipeline::ClearGeometryInstanceQueue() {
-	gGeometryInstanceQueue.clear();
-	gGeometryInstanceQueue.shrink_to_fit();
+void MRenderDeferredPipeline::ClearRenderInstanceQueue() {
+	gRenderInstanceQueue.clear();
+	gRenderInstanceQueue.shrink_to_fit();
 }
 
 void MRenderDeferredPipeline::CopyForwardDepthBufferToDeferredDepthBuffer() {

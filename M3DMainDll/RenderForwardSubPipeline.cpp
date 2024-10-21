@@ -134,7 +134,7 @@ void MRenderForwardPipeline::SendMatricesToShader() {
 	mTransparentLightingShader->UniformMat4("model", gCurrentModel);
 }
 
-void MRenderForwardPipeline::RenderQueueGeometryInstances() {
+void MRenderForwardPipeline::RenderQueueInstances() {
 	glBindFramebuffer(GL_FRAMEBUFFER, gTransparentLightingBuffer);
 	glDisable(GL_CULL_FACE);
 	glViewport(0, 0, gPlatform->gFramebufferWidth, gPlatform->gFramebufferHeight);
@@ -145,10 +145,10 @@ void MRenderForwardPipeline::RenderQueueGeometryInstances() {
 	glBlendEquation(GL_FUNC_ADD);
 	mTransparentLightingShader->UniformVec3("camPos", gCamPos);
 	mTransparentLightingShader->Use();
-	for (auto i = 0u; i < gGeometryInstanceQueue.size(); i++) {
-		if (gGeometryInstanceQueue[i].mOwner->IsRigidStatic()) {
-			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gGeometryInstanceQueue[i].mShape);
-			MRigidStatic* rs = reinterpret_cast<MRigidStatic*>(gGeometryInstanceQueue[i].mOwner);
+	for (auto i = 0u; i < gRenderInstanceQueue.size(); i++) {
+		if (gRenderInstanceQueue[i].mOwner->IsRigidStatic()) {
+			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gRenderInstanceQueue[i].mShape);
+			MRigidStatic* rs = reinterpret_cast<MRigidStatic*>(gRenderInstanceQueue[i].mOwner);
 
 			LoadMatrix(MMatrixType::MODEL, rs->mModelMatrix);
 			rs->mModel->PushUseCustomMaterialFlag();
@@ -167,9 +167,9 @@ void MRenderForwardPipeline::RenderQueueGeometryInstances() {
 
 			rs->mModel->PopUseCustomMaterialFlag();
 		}
-		else if (gGeometryInstanceQueue[i].mOwner->mClassName == "StaticMeshComponent") {
-			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gGeometryInstanceQueue[i].mShape);
-			MStaticMeshComponent* mc = reinterpret_cast<MStaticMeshComponent*>(gGeometryInstanceQueue[i].mOwner);
+		else if (gRenderInstanceQueue[i].mOwner->mClassName == "StaticMeshComponent") {
+			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gRenderInstanceQueue[i].mShape);
+			MStaticMeshComponent* mc = reinterpret_cast<MStaticMeshComponent*>(gRenderInstanceQueue[i].mOwner);
 
 			if (mc->mPhysicsProxy) {
 				LoadMatrix(MMatrixType::MODEL, mc->mPhysicsProxy->GetModelMatrix());
@@ -203,13 +203,13 @@ void MRenderForwardPipeline::RenderQueueGeometryInstances() {
 	glBindFramebuffer(GL_FRAMEBUFFER, gPlatform->gDefaultFBO);
 }
 
-void MRenderForwardPipeline::AddGeometryInstanceToQueue(MGeometryInstance mesh) {
-	gGeometryInstanceQueue.push_back(mesh);
+void MRenderForwardPipeline::AddRenderInstanceToQueue(MRenderInstance mesh) {
+	gRenderInstanceQueue.push_back(mesh);
 }
 
-void MRenderForwardPipeline::ClearGeometryInstanceQueue() {
-	gGeometryInstanceQueue.clear();
-	gGeometryInstanceQueue.shrink_to_fit();
+void MRenderForwardPipeline::ClearRenderInstanceQueue() {
+	gRenderInstanceQueue.clear();
+	gRenderInstanceQueue.shrink_to_fit();
 }
 
 void MRenderForwardPipeline::SetLightSpaceMatrix(const glm::mat4& matrix) {

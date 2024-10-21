@@ -49,7 +49,7 @@ void MRigidStatic::Update(double dt) {
 	else {
 		this->mModel->SetUseCustomMaterialFlag(false);
 	}
-	mModel->CommitGeometryInstances();
+	mModel->CommitRenderInstances();
 	this->mModel->PopUseCustomMaterialFlag();
 }
 

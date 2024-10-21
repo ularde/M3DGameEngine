@@ -74,30 +74,30 @@ glm::vec3 MModel::GetOffsetXYZ() {
 	}
 }
 
-void MModel::CommitGeometryInstances() {
+void MModel::CommitRenderInstances() {
 	if (mLoaded) {
 		for (unsigned int i = 0; i < mMeshes.size(); i++) {
 			if (mPresentOwner->IsRigidStatic()) {
-				gPlatform->gDepthMappingPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MRigidStatic*>(mPresentOwner), &mMeshes[i]));
+				gPlatform->gDepthMappingPipeline->AddRenderInstanceToQueue(MRenderInstance(reinterpret_cast<MRigidStatic*>(mPresentOwner), &mMeshes[i]));
 			}
 			else if (mPresentOwner->IsMeshComponent()) {
-				gPlatform->gDepthMappingPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MMeshComponent*>(mPresentOwner), &mMeshes[i]));
+				gPlatform->gDepthMappingPipeline->AddRenderInstanceToQueue(MRenderInstance(reinterpret_cast<MMeshComponent*>(mPresentOwner), &mMeshes[i]));
 			}
 
 			if (GetMaterial()->GetSubMaterial(mMeshes[i].GetMaterialIndex())->IsUseForwardPipeline()) {
 				if (mPresentOwner->IsRigidStatic()) {
-					gPlatform->gForwardPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MRigidStatic*>(mPresentOwner), &mMeshes[i]));
+					gPlatform->gForwardPipeline->AddRenderInstanceToQueue(MRenderInstance(reinterpret_cast<MRigidStatic*>(mPresentOwner), &mMeshes[i]));
 				}
 				else if (mPresentOwner->IsMeshComponent()) {
-					gPlatform->gForwardPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MMeshComponent*>(mPresentOwner), &mMeshes[i]));
+					gPlatform->gForwardPipeline->AddRenderInstanceToQueue(MRenderInstance(reinterpret_cast<MMeshComponent*>(mPresentOwner), &mMeshes[i]));
 				}
 			}
 			else {
 				if (mPresentOwner->IsRigidStatic()) {
-					gPlatform->gDeferredPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MRigidStatic*>(mPresentOwner), &mMeshes[i]));
+					gPlatform->gDeferredPipeline->AddRenderInstanceToQueue(MRenderInstance(reinterpret_cast<MRigidStatic*>(mPresentOwner), &mMeshes[i]));
 				}
 				else if (mPresentOwner->IsMeshComponent()) {
-					gPlatform->gDeferredPipeline->AddGeometryInstanceToQueue(MGeometryInstance(reinterpret_cast<MMeshComponent*>(mPresentOwner), &mMeshes[i]));
+					gPlatform->gDeferredPipeline->AddRenderInstanceToQueue(MRenderInstance(reinterpret_cast<MMeshComponent*>(mPresentOwner), &mMeshes[i]));
 				}
 			}
 		}

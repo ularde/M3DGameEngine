@@ -15,7 +15,7 @@
 #include "ActorEditorAgent.h"
 #include "SceneEditorAgent.h"
 #include "Model.h"
-#include "Mesh.h"
+#include "TriangleMesh.h"
 #include "Camera.h"
 
 class MActor;
@@ -122,13 +122,13 @@ void MScene::Render() {
 			gPlatform->gDepthMappingPipeline->ClearBuffers();
 			gPlatform->gDeferredPipeline->ClearBuffers();
 			gPlatform->gForwardPipeline->ClearBuffers();
-			gPlatform->gAtomspherePipeline->RenderQueueGeometryInstances();
-			gPlatform->gDepthMappingPipeline->RenderQueueGeometryInstances();
-			gPlatform->gDeferredPipeline->RenderQueueGeometryInstances();
-			gPlatform->gForwardPipeline->RenderQueueGeometryInstances();
-			gPlatform->gDeferredPipeline->ClearGeometryInstanceQueue();
-			gPlatform->gDepthMappingPipeline->ClearGeometryInstanceQueue();
-			gPlatform->gForwardPipeline->ClearGeometryInstanceQueue();
+			gPlatform->gAtomspherePipeline->RenderQueueInstances();
+			gPlatform->gDepthMappingPipeline->RenderQueueInstances();
+			gPlatform->gDeferredPipeline->RenderQueueInstances();
+			gPlatform->gForwardPipeline->RenderQueueInstances();
+			gPlatform->gDeferredPipeline->ClearRenderInstanceQueue();
+			gPlatform->gDepthMappingPipeline->ClearRenderInstanceQueue();
+			gPlatform->gForwardPipeline->ClearRenderInstanceQueue();
 		}
 	}
 }

@@ -19,7 +19,7 @@ void MRenderGuiPipeline::UpdateFramebufferSize()
 {
 }
 
-void MRenderGuiPipeline::RenderQueueGeometryInstances()
+void MRenderGuiPipeline::RenderQueueInstances()
 {
 }
 

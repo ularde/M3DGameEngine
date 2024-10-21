@@ -57,23 +57,23 @@ void MRenderDepthMappingPipeline::SendMatricesToShader() {
 	mShader->UniformMat4("model", gCurrentModel);
 }
 
-void MRenderDepthMappingPipeline::RenderQueueGeometryInstances() {
+void MRenderDepthMappingPipeline::RenderQueueInstances() {
 	glBindFramebuffer(GL_FRAMEBUFFER, mDepthFBO);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	mShader->Use();
 	glViewport(0, 0, gDepthMapWidth, gDepthMapHeight);
 
-	for (auto i = 0u; i < gGeometryInstanceQueue.size(); i++) {
-		if (gGeometryInstanceQueue[i].mOwner->IsRigidStatic()) {
-			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gGeometryInstanceQueue[i].mShape);
-			MRigidStatic* rs = reinterpret_cast<MRigidStatic*>(gGeometryInstanceQueue[i].mOwner);
+	for (auto i = 0u; i < gRenderInstanceQueue.size(); i++) {
+		if (gRenderInstanceQueue[i].mOwner->IsRigidStatic()) {
+			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gRenderInstanceQueue[i].mShape);
+			MRigidStatic* rs = reinterpret_cast<MRigidStatic*>(gRenderInstanceQueue[i].mOwner);
 			LoadMatrix(MMatrixType::MODEL, rs->mModelMatrix);
 			mesh->Render();
 		}
-		else if (gGeometryInstanceQueue[i].mOwner->IsStaticMeshComponent()) {
-			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gGeometryInstanceQueue[i].mShape);
-			MStaticMeshComponent* mc = reinterpret_cast<MStaticMeshComponent*>(gGeometryInstanceQueue[i].mOwner);
+		else if (gRenderInstanceQueue[i].mOwner->IsStaticMeshComponent()) {
+			MTriangleMesh* mesh = reinterpret_cast<MTriangleMesh*>(gRenderInstanceQueue[i].mShape);
+			MStaticMeshComponent* mc = reinterpret_cast<MStaticMeshComponent*>(gRenderInstanceQueue[i].mOwner);
 			if (mc->mPhysicsProxy) {
 				LoadMatrix(MMatrixType::MODEL, mc->mPhysicsProxy->GetModelMatrix());
 			}
@@ -86,13 +86,13 @@ void MRenderDepthMappingPipeline::RenderQueueGeometryInstances() {
 	glViewport(0, 0, gPlatform->GetWindowWidth(), gPlatform->GetWindowHeight());
 }
 
-void MRenderDepthMappingPipeline::AddGeometryInstanceToQueue(MGeometryInstance mesh) {
-	gGeometryInstanceQueue.push_back(mesh);
+void MRenderDepthMappingPipeline::AddRenderInstanceToQueue(MRenderInstance mesh) {
+	gRenderInstanceQueue.push_back(mesh);
 }
 
-void MRenderDepthMappingPipeline::ClearGeometryInstanceQueue() {
-	gGeometryInstanceQueue.clear();
-	gGeometryInstanceQueue.shrink_to_fit();
+void MRenderDepthMappingPipeline::ClearRenderInstanceQueue() {
+	gRenderInstanceQueue.clear();
+	gRenderInstanceQueue.shrink_to_fit();
 }
 
 void MRenderDepthMappingPipeline::UpdateDepthMappingSize() {

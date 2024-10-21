@@ -1,12 +1,12 @@
 #pragma once
 #include "RenderPipeline.h"
-#include "GeometryInstance.h"
+#include "RenderInstance.h"
 #include <vector>
 
 class MRenderPipeline;
 class MShaderProgram;
 class MBasicPlatform;
-struct MGeometryInstance;
+struct MRenderInstance;
 
 class MRenderDepthMappingPipeline :public MRenderPipeline {
 public:
@@ -16,9 +16,9 @@ public:
 	virtual void DisableColorMask()override;
 	virtual void EnableColorMask()override;
 	virtual void SendMatricesToShader()override;
-	virtual void RenderQueueGeometryInstances()override;
-	void AddGeometryInstanceToQueue(MGeometryInstance mesh);
-	void ClearGeometryInstanceQueue();
+	virtual void RenderQueueInstances()override;
+	void AddRenderInstanceToQueue(MRenderInstance mesh);
+	void ClearRenderInstanceQueue();
 	void UpdateDepthMappingSize();
 	void SetLightSpaceMatrix(const glm::mat4& matrix);
 	void ClearBuffers();
@@ -28,6 +28,6 @@ public:
 protected:
 	int gDepthMapWidth = 1024, gDepthMapHeight = 1024;
 	MShaderProgram* mShader = NULL;
-	std::vector<MGeometryInstance> gGeometryInstanceQueue;
+	std::vector<MRenderInstance> gRenderInstanceQueue;
 	GLuint mDepthFBO, mDepthTex;
 };

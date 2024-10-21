@@ -26,6 +26,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#include <stb_image_write.h>
 
 #include <GL/freeglut.h>
 
@@ -59,6 +60,8 @@ typedef int(APIENTRYP PFNMWGLCHOOSEPIXELFORMAT)(HDC, PIXELFORMATDESCRIPTOR*);
 static PFNMWGLCHOOSEPIXELFORMAT mwglChoosePixelFormat;
 typedef BOOL(APIENTRYP PFNMWGLSETPIXELFORMAT)(HDC, int, PIXELFORMATDESCRIPTOR*);
 static PFNMWGLSETPIXELFORMAT mwglSetPixelFormat;
+
+static int lmbn = 0;
 
 static int InitializeMesa3D(void) {
 	libMGL = LoadLibrary(L"mogl32.dll");
@@ -314,6 +317,14 @@ void MGame::Update() {
 	this->gGuiContext->RenderText("arial", std::string("FPS ") + std::to_string(int(this->FPS)), 10.0f, this->gFramebufferHeight - 25.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.5);
 
 	(*gLuaState)["Main_OnTickFinish"]();
+
+	if (GetKey(GLFW_KEY_F10) && lmbn == 0) {
+		lmbn++;
+		CaptureScreenshot();
+	}
+	if (!GetKey(GLFW_KEY_F10) && lmbn >= 1) {
+		lmbn = 0;
+	}
 
 	this->FPS = 1.0 / abs(this->deltaTime);
 
@@ -661,6 +672,41 @@ void MBasicPlatform::UpdateFullscreenState() {
 
 }
 
+void MBasicPlatform::CaptureScreenshot() {
+	SYSTEMTIME systime;
+	GetSystemTime(&systime);
+	std::string fileName = GetFullAssetPathA("Screenshots\\") + std::to_string(systime.wYear) + "-" + std::to_string(systime.wMonth) + "-" + std::to_string(systime.wDay) + "-" + std::to_string(systime.wHour) + "-" + std::to_string(systime.wMinute) + "-" + std::to_string(systime.wSecond) + "-" + std::to_string(systime.wMilliseconds) + ".tga";
+
+	GLuint tmpFBO = 0, tmpTex = 0;
+	glGenFramebuffers(1, &tmpFBO);
+	glGenTextures(1, &tmpTex);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tmpFBO);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, gDefaultFBO);
+
+	glBindTexture(GL_TEXTURE_2D, tmpTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, gFramebufferWidth, gFramebufferHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tmpTex, 0);
+
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glBlitFramebuffer(0, 0, gFramebufferWidth, gFramebufferHeight, 0, 0, gFramebufferWidth, gFramebufferHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+	auto data = (unsigned char*)malloc(size_t(gFramebufferWidth) * size_t(gFramebufferHeight) * size_t(3) * sizeof(unsigned char));
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, &data[0]);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	stbi_flip_vertically_on_write(true);
+	stbi_write_tga(fileName.c_str(), gFramebufferWidth, gFramebufferHeight, 3, data);
+	free(data);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, gDefaultFBO);
+
+	glDeleteFramebuffers(1, &tmpFBO);
+	glDeleteTextures(1, &tmpTex);
+}
+
 void MBasicPlatform::MakeLuaBindings() {
 	gLuaState->new_usertype<glm::vec2>("vec2",
 		"x", &glm::vec2::x,
@@ -967,6 +1013,14 @@ void MEditor::Update() {
 			this->gGuiContext->RenderText("arial", std::string("FPS ") + std::to_string(int(this->FPS)), 10.0f, this->gFramebufferHeight - 25.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.5);
 			(*gLuaState)["Main_OnTickFinish"]();
 		}
+	}
+
+	if (GetKey(GLFW_KEY_F10) && lmbn == 0) {
+		lmbn++;
+		CaptureScreenshot();
+	}
+	if (!GetKey(GLFW_KEY_F10) && lmbn >= 1) {
+		lmbn = 0;
 	}
 
 	this->FPS = 1.0 / abs(this->deltaTime);

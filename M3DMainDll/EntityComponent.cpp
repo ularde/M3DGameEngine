@@ -50,7 +50,7 @@ void MStaticMeshComponent::Update(double dt) {
 	if (this->mPhysicsProxy->mOutputMeshAttachmentAssigned && this->model) {
 		this->model->PushUseCustomMaterialFlag();
 		this->model->SetUseCustomMaterialFlag(false);
-		this->model->CommitGeometryInstances();
+		this->model->CommitRenderInstances();
 		this->model->PopUseCustomMaterialFlag();
 	}
 }

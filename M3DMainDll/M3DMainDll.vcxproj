@@ -175,7 +175,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameConsole.h" />
     <ClInclude Include="GameContext.h" />
-    <ClInclude Include="GeometricShape.h" />
+    <ClInclude Include="RenderObject.h" />
     <ClInclude Include="glad.h" />
     <ClInclude Include="GuiContext.h" />
     <ClInclude Include="imconfig.h" />
@@ -190,7 +190,7 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MatrixManager.h" />
-    <ClInclude Include="GeometryInstance.h" />
+    <ClInclude Include="RenderInstance.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PhysXInterface.h" />
@@ -209,7 +209,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneEditorAgent.h" />
     <ClInclude Include="SharedFunc.h" />
-    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="TriangleMesh.h" />
     <ClInclude Include="RigidStatic.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TimeOfDay.h" />
@@ -240,7 +240,7 @@
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MatrixManager.cpp" />
-    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="TriangleMesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

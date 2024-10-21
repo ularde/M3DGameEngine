@@ -1,7 +1,7 @@
 #pragma once
 #include "RenderPipeline.h"
 #include "Platforms.h"
-#include "GeometryInstance.h"
+#include "RenderInstance.h"
 
 class MRenderPipeline;
 class MBasicPlatform;
@@ -16,10 +16,10 @@ public:
 	virtual void DisableColorMask()override;
 	virtual void EnableColorMask()override;
 	virtual void SendMatricesToShader()override;
-	virtual void RenderQueueGeometryInstances()override;
+	virtual void RenderQueueInstances()override;
 	unsigned int GetTransparentCompositionResultChannel() { return gTransparentCompositionChannel; }
-	void AddGeometryInstanceToQueue(MGeometryInstance mesh);
-	void ClearGeometryInstanceQueue();
+	void AddRenderInstanceToQueue(MRenderInstance mesh);
+	void ClearRenderInstanceQueue();
 	void SetLightSpaceMatrix(const glm::mat4& matrix);
 	void SetDirectionalLight(const glm::vec3& dir, const glm::vec3& color);
 	void SetTransparentLightingShaderFloat(const std::string& n, const float v);
@@ -30,7 +30,7 @@ public:
 	void ClearBuffers();
 	void RenderNDCQuad();
 protected:
-	std::vector<MGeometryInstance> gGeometryInstanceQueue;
+	std::vector<MRenderInstance> gRenderInstanceQueue;
 	MShaderProgram* mTransparentLightingShader = NULL;
 	MShaderProgram* mTransparentCompositionShader = NULL;
 	GLuint gTransparentCompositionBuffer = 0;

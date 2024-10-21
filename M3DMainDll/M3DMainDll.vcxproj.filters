@@ -31,8 +31,11 @@
     <Filter Include="头文件\MImGui">
       <UniqueIdentifier>{c4ae00a2-7e4c-4005-a753-769562d241d0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\Geometry">
+    <Filter Include="头文件\Render">
       <UniqueIdentifier>{fff2ebdf-c1c7-4b47-8dcf-cb86c042883e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Render">
+      <UniqueIdentifier>{8bf301ea-c091-48ec-a90b-c7d280c5f862}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -189,14 +192,14 @@
     <ClInclude Include="RenderForwardSubPipeline.h">
       <Filter>头文件\RenderPipeline</Filter>
     </ClInclude>
-    <ClInclude Include="GeometryInstance.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="RenderObject.h">
+      <Filter>头文件\Render</Filter>
     </ClInclude>
-    <ClInclude Include="GeometricShape.h">
-      <Filter>头文件\Geometry</Filter>
+    <ClInclude Include="TriangleMesh.h">
+      <Filter>头文件\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>头文件\Geometry</Filter>
+    <ClInclude Include="RenderInstance.h">
+      <Filter>头文件\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -269,9 +272,6 @@
     <ClCompile Include="RenderPipeline.cpp">
       <Filter>源文件\RenderPipeline</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="RenderAtomspherePipeline.cpp">
       <Filter>源文件\RenderPipeline</Filter>
     </ClCompile>
@@ -325,6 +325,9 @@
     </ClCompile>
     <ClCompile Include="RenderForwardSubPipeline.cpp">
       <Filter>源文件\RenderPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="TriangleMesh.cpp">
+      <Filter>源文件\Render</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

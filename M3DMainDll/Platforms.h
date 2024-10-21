@@ -84,6 +84,7 @@ public:
 	void LoadUIForm(const std::string& path);
 	void UpdateDepthMappingPipeline();
 	void UpdateFullscreenState();
+	void CaptureScreenshot();
 	MScene* GetCurrentScene() { if (gMode == MPlatformMode::SCENE) { return reinterpret_cast<MScene*>(gCurrentContainer); } return 0; }
 	MPlatformMode gMode;
 	MPlatformType gType;

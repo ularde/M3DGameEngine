@@ -10,7 +10,7 @@ public:
 	~MRenderGuiPipeline();
 	MShaderProgram* GetGuiShader() { return mGuiShader; }
 	virtual void UpdateFramebufferSize()override;
-	virtual void RenderQueueGeometryInstances()override;
+	virtual void RenderQueueInstances()override;
 	virtual void SendMatricesToShader()override;
 	virtual void DisableColorMask()override;
 	virtual void EnableColorMask()override;
