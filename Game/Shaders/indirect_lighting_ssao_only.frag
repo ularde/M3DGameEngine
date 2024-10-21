@@ -9,7 +9,7 @@ uniform sampler2D normalChannel;
 uniform sampler2D mraChannel;
 uniform sampler2D noiseTex;
 uniform mat4 projection;
-uniform vec2 framebufferSize;
+uniform ivec2 framebufferSize;
 const vec3 samples[64] = {
 vec3(0.0497709, -0.0447092, 0.0499634),
 vec3(0.0145746, 0.0165311, 0.00223862),
@@ -87,10 +87,11 @@ vec3 calculateIndirectLight(float cosThetaSi, float cosThetaRi, float di, vec3 c
 
 void main()
 {
-    vec3 fragPos = texture(positionChannel, vTexCoords).xyz;
-    vec3 normal = normalize(texture(normalChannel, vTexCoords).xyz);
-    vec2 noiseScale = framebufferSize / 4.0;
-    vec3 randomVec = normalize(texture(noiseTex, vTexCoords * noiseScale).xyz);
+    ivec2 iFragCoord = ivec2(gl_FragCoord.xy * 2.0);
+    vec3 fragPos = texelFetch(positionChannel, iFragCoord, 0).xyz;
+    vec3 normal = normalize(texelFetch(normalChannel, iFragCoord, 0).xyz);
+    ivec2 idlFramebufferSize = ivec2(framebufferSize.x >> 1, framebufferSize.y >> 1);
+    vec3 randomVec = normalize(texelFetch(noiseTex, ivec2(idlFramebufferSize.x % 4, idlFramebufferSize.y % 4), 0).xyz);
     vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
     vec3 bitangent = cross(normal, tangent);
     mat3 TBN = mat3(tangent, bitangent, normal);
