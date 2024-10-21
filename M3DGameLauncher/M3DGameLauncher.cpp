@@ -1,5 +1,7 @@
-﻿// M3DGameLauncher.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
-//
+﻿#ifndef _DEBUG
+#pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" )
+#endif // DEBUG
+
 
 #include <iostream>
 #include <Windows.h>
@@ -45,7 +47,7 @@ int main() {
 	HMODULE hMainDllModule = LoadLibrary(L".\\M3DMainDll.dll");
 	if (!hMainDllModule) {
 		MessageBeep(MB_ICONERROR);
-		MessageBox(NULL, L"Failed to load DLL file : .\\M3DMainDll.dll", L"Game Launcher", MB_ICONERROR);
+		MessageBox(NULL, L"Failed to load DLL file: M3DMainDll.dll", L"Game Launcher", MB_ICONERROR);
 		return -1;
 	}
 	else {
