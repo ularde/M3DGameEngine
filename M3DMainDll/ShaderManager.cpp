@@ -219,6 +219,10 @@ void MShaderProgram::UniformDouble(const std::string& vName, const GLfloat data)
 	glProgramUniform1d(mProgramID, glGetUniformLocation(mProgramID, vName.c_str()), data);
 }
 
+void MShaderProgram::UniformIVec2(const std::string& vName, const glm::ivec2& vec) {
+	glProgramUniform2i(mProgramID, glGetUniformLocation(mProgramID, vName.c_str()), vec.x, vec.y);
+}
+
 void MShaderProgram::UniformVec2(const std::string& vName, const glm::vec2& vec) {
 	glProgramUniform2f(mProgramID, glGetUniformLocation(mProgramID, vName.c_str()), vec.x, vec.y);
 }

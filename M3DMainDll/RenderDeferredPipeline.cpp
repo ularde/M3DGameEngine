@@ -185,8 +185,8 @@ void MRenderDeferredPipeline::UpdateFramebufferSize() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	//update framebuffer size for indirect lighting 
-	this->mIndirectLightingPassShader->UniformVec2("framebufferSize",
-		glm::vec2((float)gPlatform->gFramebufferWidth, (float)gPlatform->gFramebufferHeight));
+	this->mIndirectLightingPassShader->UniformIVec2("framebufferSize",
+		glm::vec2(gPlatform->gFramebufferWidth, gPlatform->gFramebufferHeight));
 }
 
 void MRenderDeferredPipeline::RenderQueueGeometryInstances() {

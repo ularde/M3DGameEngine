@@ -35,6 +35,7 @@ public:
 	void UniformUint(const std::string& vName, const GLuint data);
 	void UniformFloat(const std::string& vName, const GLfloat data);
 	void UniformDouble(const std::string& vName, const GLfloat data);
+	void UniformIVec2(const std::string& vName, const glm::ivec2& vec);
 	void UniformVec2(const std::string& vName, const glm::vec2& vec);
 	void UniformVec3(const std::string& vName, const glm::vec3& vec);
 	void UniformVec4(const std::string& vName, const glm::vec4& vec);

@@ -132,13 +132,15 @@ MGame::MGame(unsigned int OS) {
 	glfwInit();
 
 	const GLFWvidmode* vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	int monitor_x = 0, monitor_y = 0;
+	glfwGetMonitorPos(glfwGetPrimaryMonitor(), &monitor_x, &monitor_y);
 	
 	if (!gGalliumFlag) {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		this->gWindow = glfwCreateWindow(this->gFramebufferWidth, this->gFramebufferHeight, windowTitle.c_str(), NULL, NULL);
-		glfwSetWindowPos(this->gWindow, vidmode->width >> 3, vidmode->height >> 3);
+		glfwSetWindowPos(this->gWindow, monitor_x + (vidmode->width >> 1) - (gFramebufferWidth >> 1), monitor_y + (vidmode->height >> 1) - (gFramebufferHeight >> 1));
 
 		glfwMakeContextCurrent(this->gWindow);
 		glfwSwapInterval(-1);
@@ -154,8 +156,7 @@ MGame::MGame(unsigned int OS) {
 		if (InitializeMesa3D()) {
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			this->gWindow = glfwCreateWindow(this->gFramebufferWidth, this->gFramebufferHeight, windowTitle.c_str(), NULL, NULL);
-			glfwSetWindowPos(this->gWindow, vidmode->width >> 3, vidmode->height >> 3);
-
+			glfwSetWindowPos(this->gWindow, monitor_x + (vidmode->width >> 1) - (gFramebufferWidth >> 1), monitor_y + (vidmode->height >> 1) - (gFramebufferHeight >> 1));
 			HWND hWnd = glfwGetWin32Window(this->gWindow);
 			HDC dc = GetDC(hWnd);
 			PIXELFORMATDESCRIPTOR pfd =
@@ -205,7 +206,7 @@ MGame::MGame(unsigned int OS) {
 	glfwSetFramebufferSizeCallback(this->gWindow, OfflineGame_FramebufferSizeCallback);
 	glfwSetCursorPosCallback(this->gWindow, OfflineGame_CursorPosCallback);
 	glfwSetScrollCallback(this->gWindow, OfflineGame_ScrollCallback);
-	//glfwSetWindowSizeLimits(this->window, this->windowWidth, this->windowHeight, this->windowWidth, this->windowHeight);
+	glfwSetWindowSizeLimits(this->gWindow, this->gFramebufferWidth, this->gFramebufferHeight, this->gFramebufferWidth, this->gFramebufferHeight);
 
 	this->SplashScreen();
 
@@ -270,13 +271,13 @@ int MGame::GetKeyInGameConsole(int key) {
 }
 
 void MGame::Update() {
-	static bool fullscreenIntit = false;
+	static bool fullscreenIntit = true;
 	this->currentFrameTime = glfwGetTime();
 	this->deltaTime = this->currentFrameTime - this->lastFrameTime;
 	this->lastFrameTime = this->currentFrameTime;
 
-	if (this->gFullscreenFlag && !fullscreenIntit) {
-		fullscreenIntit = true;
+	if (this->gFullscreenFlag && fullscreenIntit) {
+		fullscreenIntit = false;
 		const GLFWvidmode* vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 		glfwSetWindowSize(this->gWindow, vidmode->width, vidmode->height);
 		glfwSetWindowMonitor(this->gWindow, glfwGetPrimaryMonitor(), 0, 0, vidmode->width, vidmode->height, GLFW_DONT_CARE);

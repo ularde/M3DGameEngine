@@ -5,6 +5,6 @@
 <Texture type="texture_metallic" path="" color="0.38"/>
 <Texture type="texture_roughness" path="" color="0.18"/>
 <Texture type="texture_AO" path="" color="1.0"/>
-<Texture type="texture_opacity" path="" color="0.5"/>
+<Texture type="texture_opacity" path="" color="1.0"/>
 </SubMaterial>
 </Material>
